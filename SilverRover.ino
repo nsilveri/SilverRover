@@ -3,41 +3,41 @@
 #include "FaBoPWM_PCA9685.h"
 #include <HCSR04.h>
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
-HCSR04 hc(5,new int[4]{3,2,4,6},4);
+HCSR04 hc(5,new int[4]{3,2,4,6},4); //(ECHO PIN, multisensors PINs vector, sensors number)
 #define SERVO_FREQ 60 // Analog servos run at ~50 Hz updates
-#define STERZO_SINISTRA_MAX 220
-#define STERZO_DRITTO 330//328
-#define STERZO_DESTRA_MAX 440
+#define STERZO_SINISTRA_MAX 220 //pulse length corresponding to the maximum angle of steering to the left
+#define STERZO_DRITTO 330//328 //pulse length corresponding to the centre angle of steering
+#define STERZO_DESTRA_MAX 440 //pulse length corresponding to the maximum angle of steering to the right
 #define DRITTO STERZO_DRITTO
-#define CHIUSO 0
-#define APERTO 1
-#define META 2
-#define ATTIVATO 1
-#define DISATTIVATO 0
+#define CHIUSO 0 //closed
+#define APERTO 1 //opened
+#define META 2   //half
+#define ATTIVATO 1 //enabled
+#define DISATTIVATO 0 //disabled
 FaBoPWM faboPWM;  
-const uint16_t STOP = 0;
-uint16_t rover_speed = 400;
+const uint16_t STOP = 0; //pulse length to stop continuous rotation servomotors
+uint16_t rover_speed = 400;// pulse length for continuously rotating servomotors in one direction
 const uint16_t FORWARD = rover_speed;
-const uint16_t BACK = 250;
-const uint16_t run_delay = 2100; //2100 percorre circa 50cm
-uint8_t POSIZIONE_PANNELLO_DX = CHIUSO;
-uint8_t POSIZIONE_PANNELLO_SX = CHIUSO;
-uint8_t peso_destra = 0;
-uint8_t peso_sinistra = 0;
-uint8_t stato_precedente = CHIUSO;
-const uint8_t panel_speed = 5;
-int radar_scan[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-int radar_scan_motor[13] = {200, 230, 260, 290, 350, 370, 390, 420, 450, 480, 510, 540, 570};
-uint8_t webcam_sterzo = ATTIVATO;
-uint8_t radar_sterzo = ATTIVATO;
+const uint16_t BACK = 250;// pulse length for continuously rotating servomotors in the opposite direction
+const uint16_t run_delay = 2100; //2100 delay time needed to cover about 50cm
+uint8_t POSIZIONE_PANNELLO_DX = CHIUSO; //home position of the right solar panel
+uint8_t POSIZIONE_PANNELLO_SX = CHIUSO;//home position of the left solar panel
+uint8_t peso_destra = 0; //0 indicates that the right weight function is disabled, 1 enabled
+uint8_t peso_sinistra = 0; //0 indicates that the left weight function is disabled, 1 enabled
+uint8_t stato_precedente = CHIUSO; //indicates the previous status of the 2 panels allowing both to return to the status prior to the activation of the weight functions
+const uint8_t panel_speed = 5; //solar panels movements speed
+int radar_scan[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};  //in this vector the values recorded by the front sensor are saved, each box corresponds to the respective angle taken by the radar_motor_scan vector
+int radar_scan_motor[13] = {200, 230, 260, 290, 350, 370, 390, 420, 450, 480, 510, 540, 570}; // each element of this vector contains the pulse length corresponding to an angle, the final objective is to monitor the entire front angle through the front HCSR-04
+uint8_t webcam_sterzo = ATTIVATO; //if enabled the webcam will move simultaneously with the front steering (based on the rear steering as the webcam motor is upside down)
+uint8_t radar_sterzo = ATTIVATO; //if enabled the front radar will move simultaneously with the front steering (based on the rear steering as the webcam motor is upside down)
 //uint8_t pca_off = ATTIVATO;
-uint16_t posizione_sterzo = STERZO_DRITTO;
-uint16_t webcam_sopra_sotto = 250;
-uint16_t webcam_sinistra_destra = 268;
-uint8_t risparmio_energetico = DISATTIVATO;
-uint8_t faro = DISATTIVATO;
-uint16_t radar_delay = 100;
-uint16_t precisione_sterzo = 2;
+uint16_t posizione_sterzo = STERZO_DRITTO; //the steering is moved according to this value, the steering functions modify this value. the initial value corresponds to the steering in the straight position
+uint16_t webcam_sopra_sotto = 250; //initial position of the webacm tilt
+uint16_t webcam_sinistra_destra = 268; //initial position of the webacm pan
+uint8_t risparmio_energetico = DISATTIVATO; //energy saving: if enabled, the PCA card is disabled immediately after the actions are performed. (FUNCTION NOT IMPLEMENTED)
+uint8_t faro = DISATTIVATO; //headlight: the function that enables the headlight modifies this value
+uint16_t radar_delay = 100; //delay between two detections (a higher delay implies a higher precision)
+uint16_t precisione_sterzo = 2; 
 uint16_t valore_sterzata = 55;
 int8_t webcam_X = 0;
 int8_t webcam_Y = 0;
@@ -105,7 +105,7 @@ void setServoPulse(uint8_t n, double pulse) {
   pwm.setPWM(n, 0, pulse);
 }
 
-void forward(uint16_t comand)
+void forward(uint16_t comand) //forward stop reverse function
 {
   if(comand == STOP)
   {
