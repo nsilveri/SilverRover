@@ -1,5 +1,6 @@
 # SilverRover
-A little Rover made with 2 DVD cases, 5 servomotors (Servo 9G), 4 rotational servomotors (Servo 9G R), 2 solar panel (5v 500mA + 5v 500mA) managed by 2 Servo 9G for each and 4 hcsr-04, with the forward sensor motorized with 1 of 5 Servo 9G, one Raspberry Pi Camera with IR for night vision,a powerbank with 2 ports and 5000mAh; all this driven by Arduino that receive commands from an Raspbery Pi via USB Serial, the Raspberry Pi receives comands via SSH
+A small Rover made with 2 DVD cases, 5 servomotors (Servo 9G), 4 rotary servomotors (Servo 9G R), 2 solar panels (5v 500mA + 5v 500mA) managed by 2 Servo 9G each and 4 hcsr-04, with the sensor front motorized with 1 of 5 9G Servos, a Raspberry Pi Camera with IR for night vision, 2 power banks with 5000mAh;
+all this driven by Arduino which receives commands from a Raspbery Pi via USB Serial, the Raspberry Pi receives commands via SSH
 
 
 
