@@ -1,52 +1,73 @@
+//#include <SoftwareSerial.h>
 #include <Wire.h>
 #include <Adafruit_PWMServoDriver.h>
 #include "FaBoPWM_PCA9685.h"
 #include <HCSR04.h>
 Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
-HCSR04 hc(5,new int[4]{3,2,4,6},4); //(ECHO PIN, multisensors PINs vector, sensors number)
+HCSR04 hc(5,new int[4]{3,2,4,6},4);
 #define SERVO_FREQ 60 // Analog servos run at ~50 Hz updates
-#define STERZO_SINISTRA_MAX 220 //pulse length corresponding to the maximum angle of steering to the left
-#define STERZO_DRITTO 330//328 //pulse length corresponding to the centre angle of steering
-#define STERZO_DESTRA_MAX 440 //pulse length corresponding to the maximum angle of steering to the right
+#define STERZO_SINISTRA_MAX 220
+#define STERZO_DRITTO 330//328
+#define STERZO_DESTRA_MAX 440
 #define DRITTO STERZO_DRITTO
-#define CHIUSO 0 //closed
-#define APERTO 1 //opened
-#define META 2   //half
-#define ATTIVATO 1 //enabled
-#define DISATTIVATO 0 //disabled
+#define CHIUSO 0
+#define APERTO 1
+#define META 2
+#define ATTIVATO 1
+#define DISATTIVATO 0
 FaBoPWM faboPWM;  
-const uint16_t STOP = 0; //pulse length to stop continuous rotation servomotors
-uint16_t rover_speed = 400;// pulse length for continuously rotating servomotors in one direction
+const uint16_t STOP = 0;
+uint16_t rover_speed = 400;
 const uint16_t FORWARD = rover_speed;
-const uint16_t BACK = 250;// pulse length for continuously rotating servomotors in the opposite direction
-const uint16_t run_delay = 2100; //2100 delay time needed to cover about 50cm
-uint8_t POSIZIONE_PANNELLO_DX = CHIUSO; //home position of the right solar panel
-uint8_t POSIZIONE_PANNELLO_SX = CHIUSO;//home position of the left solar panel
-uint8_t peso_destra = 0; //0 indicates that the right weight function is disabled, 1 enabled
-uint8_t peso_sinistra = 0; //0 indicates that the left weight function is disabled, 1 enabled
-uint8_t stato_precedente = CHIUSO; //indicates the previous status of the 2 panels allowing both to return to the status prior to the activation of the weight functions
-const uint8_t panel_speed = 5; //solar panels movements speed
-int radar_scan[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};  //in this vector the values recorded by the front sensor are saved, each box corresponds to the respective angle taken by the radar_motor_scan vector
-int radar_scan_motor[13] = {200, 230, 260, 290, 350, 370, 390, 420, 450, 480, 510, 540, 570}; // each element of this vector contains the pulse length corresponding to an angle, the final objective is to monitor the entire front angle through the front HCSR-04
-uint8_t webcam_sterzo = ATTIVATO; //if enabled the webcam will move simultaneously with the front steering (based on the rear steering as the webcam motor is upside down)
-uint8_t radar_sterzo = ATTIVATO; //if enabled the front radar will move simultaneously with the front steering (based on the rear steering as the webcam motor is upside down)
+const uint16_t BACK = 250;
+const uint16_t run_delay = 2100; //2100 percorre circa 50cm
+uint8_t POSIZIONE_PANNELLO_DX = CHIUSO;
+uint8_t POSIZIONE_PANNELLO_SX = CHIUSO;
+uint8_t peso_destra = 0;
+uint8_t peso_sinistra = 0;
+uint8_t stato_precedente = CHIUSO;
+const uint8_t panel_speed = 5;
+int radar_scan[13] = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+int radar_scan_motor[13] = {200, 230, 260, 290, 350, 370, 390, 420, 450, 480, 510, 540, 570};
+uint8_t webcam_sterzo = ATTIVATO;
+uint8_t radar_sterzo = DISATTIVATO;
 //uint8_t pca_off = ATTIVATO;
-uint16_t posizione_sterzo = STERZO_DRITTO; //the steering is moved according to this value, the steering functions modify this value. the initial value corresponds to the steering in the straight position
-uint16_t webcam_sopra_sotto = 250; //initial position of the webacm tilt
-uint16_t webcam_sinistra_destra = 268; //initial position of the webacm pan
-uint8_t risparmio_energetico = DISATTIVATO; //energy saving: if enabled, the PCA card is disabled immediately after the actions are performed. (FUNCTION NOT IMPLEMENTED)
-uint8_t faro = DISATTIVATO; //headlight: the function that enables the headlight modifies this value
-uint16_t radar_delay = 100; //delay between two detections (a higher delay implies a higher precision)
-uint16_t precisione_sterzo = 2; 
-uint16_t valore_sterzata = 55;
+uint16_t posizione_sterzo = STERZO_DRITTO;
+uint16_t webcam_sopra_sotto = 250;
+uint16_t webcam_sinistra_destra = 268;
+uint16_t webcam_sopra_sotto_effettuato = DISATTIVATO;
+uint8_t risparmio_energetico = DISATTIVATO;
+uint8_t sterzo_automatico = DISATTIVATO;
+
+uint16_t radar_delay = 100;
+//int array_valore_sterzo[10] = {55, 
+uint16_t precisione_sterzo = 7;
+uint16_t valore_sterzata = 11;//precisione_sterzo;
 int8_t webcam_X = 0;
 int8_t webcam_Y = 0;
-int8_t ruote_sterzanti_post = ATTIVATO;
-int8_t ruote_sterzanti_ant = ATTIVATO;
+uint8_t ruote_sterzanti_post = ATTIVATO;
+uint8_t ruote_sterzanti_ant = ATTIVATO;
+uint16_t radar_position = 360;
+uint16_t radar_dx_ant_position = 110; 
+uint16_t radar_sx_ant_position = 580;
+//uint16_t
+//uint16_t
+int8_t avanzamento_c = DISATTIVATO;
+int8_t anticollisione = ATTIVATO;
+
+int radar_dx_ant = 0;
+int radar_dx_center = 0;
+int radar_sx_ant = 0;
+int radar_sx_center = 0;
+int radar_ant = 0;
+int radar_post = 0;
+
+//SoftwareSerial newPort(10, 11);
 
 
 void setup() {
   Serial.begin(9600);
+  //Serial.begin(9600);
   Serial.println( F("Welcome to the SilverRover"));
   Serial.println( F("Insert comand to send to the Rover."));
   Serial.println( F("scrivi 'help' per vedere i comandi disponibili"));
@@ -56,17 +77,18 @@ void setup() {
   pinMode(7,OUTPUT);
 //  pca_on_off();//attiva pca
   sterzo_dritto();
+  ruote_sterzanti_post = DISATTIVATO;
   
 
   
   delay(200);
   
-//  pca_on_off();//disattiva pca
+//pca_on_off();//disattiva pca
 }
 
 //void pca_on_off()
 //{
-//  if(pca_off == DISATTIVATO)
+//  if(pca_off == DISATTIVATO)2
 //  {
 //    pca_off = ATTIVATO;
 //    digitalWrite(7,HIGH); 
@@ -105,7 +127,7 @@ void setServoPulse(uint8_t n, double pulse) {
   pwm.setPWM(n, 0, pulse);
 }
 
-void forward(uint16_t comand) //forward stop reverse function
+void forward(uint16_t comand)
 {
   if(comand == STOP)
   {
@@ -128,33 +150,57 @@ void forward(uint16_t comand) //forward stop reverse function
   }
 }
 
+bool zona_radar(uint16_t value)
+{
+  if(value > 230 && value < 360)
+     return true;
+  return false;
+}
+
 void webcam_control()
 {
-  pwm.setPWM(15, 0, webcam_sinistra_destra);
-  pwm.setPWM(14, 0, webcam_sopra_sotto);
+  uint16_t webcam_sinistra_destra_l = webcam_sinistra_destra;
+  uint16_t webcam_sopra_sotto_l = webcam_sopra_sotto;
+  if(zona_radar(webcam_sinistra_destra) && webcam_sopra_sotto >435)
+        webcam_sopra_sotto_l = 435;
+  pwm.setPWM(15, 0, webcam_sinistra_destra_l);
+  pwm.setPWM(14, 0, webcam_sopra_sotto_l);
 }
 
 void _webcam_sterzo(uint16_t pulselen)
 {
   webcam_sinistra_destra = pulselen-60;
-  webcam_sopra_sotto = 250;
+  webcam_sopra_sotto = 315;
   pwm.setPWM(15, 0, webcam_sinistra_destra);
   pwm.setPWM(14, 0, webcam_sopra_sotto);
 }
 
 void sterzo_anteriore(uint16_t pulselen)
 {
-  pwm.setPWM(0, 0, pulselen-8);//-5
-  pwm.setPWM(1, 0, pulselen+68);
+  pulselen = pulselen +11;
+  int p_p= map(pulselen, 220, 440, 264 ,397);
+  if(pulselen > 330)
+  {
+    pwm.setPWM(0, 0, pulselen-8);//-5
+    pwm.setPWM(1, 0, p_p+68);
+  }else if(pulselen < 330)
+  {
+    pwm.setPWM(0, 0, p_p-8);//-5
+    pwm.setPWM(1, 0, pulselen+68);
+  }else {
+    pwm.setPWM(0, 0, pulselen-8);//-5
+    pwm.setPWM(1, 0, pulselen+68);
+  }
 }
+
 
 void sterzo_posteriore(uint16_t pulselen)
 {
-  if(webcam_sterzo == ATTIVATO)
-    _webcam_sterzo(pulselen);
-  if(radar_sterzo ==ATTIVATO)
-    radar_motor(pulselen);
-    delay(200);
+//  if(webcam_sterzo == ATTIVATO)
+//    _webcam_sterzo(pulselen);
+//  if(radar_sterzo ==ATTIVATO)
+//    radar_motor(pulselen);
+//    delay(200);
   pwm.setPWM(2, 0, pulselen+38);//40
   pwm.setPWM(3, 0, pulselen-5);
   
@@ -167,91 +213,44 @@ void sterzo_posteriore(uint16_t pulselen)
   int calc_angle = STERZO_DRITTO-pulselen_ant;
   uint16_t angle_post= STERZO_DRITTO + calc_angle + 25;
   if(ruote_sterzanti_ant == ATTIVATO);
-      sterzo_anteriore(pulselen_ant);
+     sterzo_anteriore(pulselen_ant);
   if(ruote_sterzanti_post == ATTIVATO)
-      sterzo_posteriore(angle_post);
+     sterzo_posteriore(angle_post);
+  if(webcam_sterzo == ATTIVATO)
+    _webcam_sterzo(angle_post);
+  if(radar_sterzo ==ATTIVATO)
+    radar_motor(angle_post);
+    //delay(200);
   }
 
   
-//  void sterzo_sinistra_1()
-//  {
-//    posizione_sterzo = SINISTRA_1;
-//    sterzo(STERZO_SINISTRA_1);
-//    //_sterzo_sinistro = ATTIVATO;
-//  }
-//  
-//  void sterzo_sinistra_2()
-//  {
-//    posizione_sterzo = SINISTRA_2;
-//    sterzo(STERZO_SINISTRA_2);
-//    //_sterzo_sinistro = ATTIVATO;
-//  }
-//
-//  void sterzo_sinistra_3()
-//  {
-//    posizione_sterzo = SINISTRA_3;
-//    sterzo(STERZO_SINISTRA_3);
-//    //_sterzo_sinistro = ATTIVATO;
-//  }
-//
-//  void sterzo_sinistra_4()
-//  {
-//    posizione_sterzo = SINISTRA_4;
-//    sterzo(STERZO_SINISTRA_4);
-//    //_sterzo_sinistro = ATTIVATO;
-//  }
-//
-//  void sterzo_sinistra_5()
-//  {
-//    posizione_sterzo = SINISTRA_5;
-//    sterzo(STERZO_SINISTRA_5);
-//    //_sterzo_sinistro = ATTIVATO;
-//  }
-//
-//  
   void sterzo_dritto()
   {
+    if(posizione_sterzo != DRITTO)
+    {
+      if(posizione_sterzo < DRITTO){
+         for(int i=posizione_sterzo; i <= DRITTO; i++)
+           {
+            posizione_sterzo = i;
+            sterzo(posizione_sterzo);
+            delay(5);
+            
+           }
+      }else if(posizione_sterzo > DRITTO)
+           {
+             for(int i=posizione_sterzo; i >= DRITTO; i--)
+               {
+                posizione_sterzo = i;
+                sterzo(posizione_sterzo);
+                delay(5);
+               }
+           }
+            
+           
+    }
     posizione_sterzo = DRITTO;
     sterzo(STERZO_DRITTO);
   }
-//
-//    void sterzo_destra_1()
-//  {
-//    posizione_sterzo = DESTRA_1;
-//    sterzo(STERZO_DESTRA_1);
-//    //_sterzo_destro = ATTIVATO;
-//  }
-//
-//  void sterzo_destra_2()
-//  {
-//    posizione_sterzo = DESTRA_2;
-//    sterzo(STERZO_DESTRA_2);
-//    //_sterzo_destro = ATTIVATO;
-//  }
-//
-//  void sterzo_destra_3()
-//  {
-//    posizione_sterzo = DESTRA_3;
-//    sterzo(STERZO_DESTRA_3);
-//    //_sterzo_destro = ATTIVATO;
-//  }
-//
-//  void sterzo_destra_4()
-//  {
-//    posizione_sterzo = DESTRA_4;
-//    sterzo(STERZO_DESTRA_4);
-//    //_sterzo_destro = ATTIVATO;
-//  }
-//
-//  void sterzo_destra_5()
-//  {
-//    posizione_sterzo = DESTRA_5;
-//    sterzo(STERZO_DESTRA_5);
-//    //_sterzo_destro = ATTIVATO;
-//  }
-
-  
-
 
   
   void panel_dx_da_meta_a_chiuso()
@@ -527,7 +526,7 @@ void sterzo_posteriore(uint16_t pulselen)
 
   void radar_motor(uint16_t angle_motor)
   {
-    pwm.setPWM(13, 0, angle_motor+15);
+    pwm.setPWM(12, 0, angle_motor+15);
   }
 
   /**/void peso_a_sinistra()
@@ -610,18 +609,13 @@ void sterzo_posteriore(uint16_t pulselen)
               }
               //peso_sinistra = DISATTIVATO;
            } 
-  }//*/
-//  void delay_millis(int delay_time)
-//  {
-//    if(millis() >= time_now + 2100)
-//                  {
-//                    time_now += period;
-//                    
-//                    if(hc.dist(0) < 12)
-//                       forward(STOP);
-//                    
-//                  }
-//  }
+  }
+
+  void avanzamento_continuo()
+  {
+    avanzamento_c = ATTIVATO;
+    forward(FORWARD);
+  }
   
   void avanti(int run_delay_1)
   {
@@ -636,51 +630,35 @@ void sterzo_posteriore(uint16_t pulselen)
         delay(200);
         if(posizione_sterzo == DRITTO)
         {
+              radar_motor(DRITTO);
               Serial.print( F("Distanza: "));
               Serial.println(distance_ant);
-              if(distance_ant>520 && run_delay_1 == 21000)
+              if(/*distance_ant>520 && */run_delay_1 == 21000)
               {
                   forward(FORWARD);
                   Serial.println( F("Avanti per 5mt"));
                   delay(run_delay_1);
                   forward(STOP);
-              }else if(distance_ant>55 && run_delay_1 == 0)
+              }else if(/*distance_ant>55 && */run_delay_1 == 0)
               {
                   forward(FORWARD);
                   Serial.println( F("Avanti per 50cm "));
                   delay(2100);
-//                  if(millis() >= time_now + 2100)
-//                  {
-//                    time_now += period;
-//                    
-//                    if(hc.dist(0) < 12)
-//                       forward(STOP);
-//                    
-//                  }
                   forward(STOP);
-              }else if(distance_ant>12 && run_delay_1 == 525)
+              }else if(/*distance_ant>12 && */run_delay_1 == 525)
               {
                   forward(FORWARD);
                   Serial.println( F("Avanti per 10cm "));
                   delay(run_delay_1);
                   forward(STOP);
               }
-              else if(distance_ant<55 && distance_ant>25 && run_delay_1 == 0)
+              else if(/*distance_ant<55 && distance_ant>25 && */run_delay_1 == 0)
               {
                   forward(FORWARD);
                   Serial.println( F("Avanti per 25cm"));
                   delay(1050);
                   forward(STOP);
-              }else if(distance_ant<25 && run_delay_1 == 0)
-              {
-                  Serial.println(F(" Sei troppo vicino ad un ostacolo, azione non consentita."));
-                  if(hc.dist(1)>25){
-                  forward(BACK);
-                  Serial.println( F("Indietro per 25cm per consentirti di sterzare."));
-                  delay(1050);
-                  forward(STOP);
-                  }else Serial.println( F("OSTACOLO SIA AVANTI CHE DIETRO...SEI BLOCCATO"));
-              }
+             }
         }else if(posizione_sterzo > DRITTO)
         {
               Serial.print( F("Distanza anteriore: "));
@@ -730,6 +708,12 @@ void sterzo_posteriore(uint16_t pulselen)
 
   void indietro()
   {
+        if(avanzamento_c == ATTIVATO)
+        {
+          forward(STOP);
+          avanzamento_c = DISATTIVATO;
+        }else if(avanzamento_c == DISATTIVATO)
+        {
         int distance_post = 0;
         int distance_sx = 0;
         int distance_dx = 0;
@@ -794,9 +778,202 @@ void sterzo_posteriore(uint16_t pulselen)
                   Serial.println( F("Ostacolo a destra troppo vicino"));                      
               }
         }
-        
+        }
   }
 
+
+bool radar_alarm()
+  {
+    radar_ant = hc.dist(0);
+            delay(radar_delay);
+    radar_motor(DRITTO);
+    radar_dx_center = hc.dist(2);
+            delay(radar_delay);
+    radar_sx_center = hc.dist(3);
+            delay(radar_delay);
+    radar_post = hc.dist(1);
+            delay(radar_delay);
+    if(radar_ant<20)
+    {
+       return true;//AVANTI
+    }
+    if(radar_dx_center<20)
+    {
+       return true;//AVANTI
+    }//DESTRO
+    if(radar_sx_center<20)
+    {
+       return true;//AVANTI
+    }//SINISTRA
+    if(radar_post<20)
+    {
+       return true;//AVANTI
+    }//POSTERIORE
+    return false;
+  }
+
+  bool radar_ant_alarm()
+  {
+    radar_ant = hc.dist(0);
+            delay(radar_delay);
+    radar_motor(DRITTO);
+    if(radar_ant<20)
+    {
+       return true;//AVANTI
+    }
+    return false;
+  }
+
+  bool radar_sx_alarm()
+  {
+      uint16_t radar_sx_center_1 = hc.dist(3);
+              delay(radar_delay);
+      uint16_t radar_sx_center_2 = hc.dist(3);
+              delay(radar_delay);
+    if(radar_sx_center_1<20 && radar_sx_center_2 < radar_sx_center_1)
+    {
+       return true;//AVANTI
+    }//SINISTRA
+    return false;
+  }
+  
+  bool radar_dx_alarm()
+  {
+      uint16_t radar_dx_center_1 = hc.dist(2);
+              delay(radar_delay);
+      uint16_t radar_dx_center_2 = hc.dist(2);
+              delay(radar_delay);
+    if(radar_dx_center_1<20 && radar_dx_center_2 < radar_dx_center_1)
+    {
+       return true;//AVANTI
+    }//DESTRO
+    return false;
+  }
+  
+  bool radar_post_alarm()
+  {
+    radar_post = hc.dist(1);
+            delay(radar_delay);
+    if(radar_post<20)
+    {
+       return true;//AVANTI
+    }//POSTERIORE
+    return false;
+  }
+
+  int lunghezza_int(int input)
+  {
+    int count = 0;
+    while (input > 0){
+         input/=10;
+         count++;
+            }
+     return count;
+  }
+
+  void radar_update()
+  {
+            radar_ant = hc.dist(0);
+            delay(radar_delay);
+            radar_motor(radar_dx_ant_position);
+            delay(200);
+            radar_dx_ant = hc.dist(0)-6; 
+            delay(radar_delay);
+            radar_motor(radar_sx_ant_position);
+            delay(400);
+            radar_sx_ant = hc.dist(0)-6;
+            delay(radar_delay);
+            radar_motor(DRITTO);
+            radar_dx_center = hc.dist(2);
+            delay(radar_delay);
+            radar_sx_center = hc.dist(3);
+            delay(radar_delay);
+            radar_post = hc.dist(1);
+            delay(radar_delay);
+  }
+
+  void radar_s()
+  {
+            radar_ant = hc.dist(0);
+            delay(radar_delay);
+            radar_motor(radar_dx_ant_position);
+            delay(200);
+            radar_dx_ant = hc.dist(0)-6; 
+            delay(radar_delay);
+            radar_motor(radar_sx_ant_position);
+            delay(400);
+            radar_sx_ant = hc.dist(0)-6;
+            delay(radar_delay);
+            radar_motor(DRITTO);
+            radar_dx_center = hc.dist(2);
+            delay(radar_delay);
+            radar_sx_center = hc.dist(3);
+            delay(radar_delay);
+            radar_post = hc.dist(1);
+            delay(radar_delay);
+            int spazi = 0;        
+            Serial.println(F("+=============|RADAR|=====================+"));
+            Serial.print(F("|AS:"));
+            Serial.print(radar_sx_ant);
+            Serial.print(F("cm"));
+            spazi = 10 - lunghezza_int(radar_sx_ant);
+            for(int i=0;i<spazi;i++)
+              {
+              Serial.print(F(" "));
+              }
+            Serial.print(F("A: "));
+            Serial.print(radar_ant);
+            Serial.print(F("cm"));
+            spazi = 10 - lunghezza_int(radar_ant);
+            for(int i=0;i<spazi;i++)
+              {
+              Serial.print(F(" "));
+              }
+            Serial.print(F("AD:"));
+            Serial.print(radar_dx_ant);
+            Serial.print(F("cm"));
+            spazi = 6 - lunghezza_int(radar_dx_ant);
+            for(int i=0;i<spazi;i++)
+              {
+              Serial.print(F(" "));
+              }
+            Serial.println(F("|"));
+            Serial.println(F("+=========================================+"));
+            delay(radar_delay);
+            Serial.print(F("|S: "));
+            Serial.print(radar_sx_center);
+            Serial.print(F("cm"));
+            spazi = 10 - lunghezza_int(radar_sx_center);
+            for(int i=0;i<spazi;i++)
+              {
+              Serial.print(F(" "));
+              }
+            delay(radar_delay);
+            Serial.print(F("               "));
+            Serial.print(F("D: "));
+            Serial.print(radar_dx_center);
+            Serial.print(F("cm"));
+            spazi = 6 - lunghezza_int(radar_dx_center);
+            for(int i=0;i<spazi;i++)
+              {
+              Serial.print(F(" "));
+              }
+            Serial.println(F("|"));
+            Serial.println(F("+=========================================+"));
+            //Serial.println(F("|"));
+            delay(radar_delay);
+            Serial.print(F("|"));
+            Serial.print(F("               D: "));
+            Serial.print(radar_post);
+            Serial.print(F("cm"));
+            spazi = 21 - lunghezza_int(radar_post);
+            for(int i=0;i<spazi;i++)
+              {
+              Serial.print(F(" "));
+              }
+            Serial.println(F("|"));
+            Serial.println(F("+=========================================+"));
+  }
   
   void loop() {
 
@@ -812,55 +989,38 @@ void sterzo_posteriore(uint16_t pulselen)
      //str.trim();
      if (str=='a') 
             {
+              int p = 0;
               if(posizione_sterzo - valore_sterzata >= STERZO_SINISTRA_MAX)
               {
                 posizione_sterzo = posizione_sterzo - valore_sterzata;
                 sterzo(posizione_sterzo);
                 Serial.print( F("Sterzo: "));
-                Serial.println(posizione_sterzo);
-                
-//                if(posizione_sterzo != 0)
-//                {
-//                  posizione_sterzo--;
-//                  dati_sterzo();  
+                Serial.println(posizione_sterzo/*posizione_sterzo*/);
+                delay(100);
                }
         }else if (str=='d') 
             {
+              int p = 0;
               if(posizione_sterzo + valore_sterzata <= STERZO_DESTRA_MAX)
               {
                 posizione_sterzo = posizione_sterzo + valore_sterzata;
                 sterzo(posizione_sterzo);
                 Serial.print( F("Sterzo: "));
-                Serial.println(posizione_sterzo);
-//                if(posizione_sterzo != 10)
-//                {
-//                  posizione_sterzo++;
-//                  dati_sterzo();
-//                }
+                Serial.println(posizione_sterzo/*posizione_sterzo*/);
+                delay(100);
                 }
             }else if (str=='w') {
         avanti(0);
      }else if (str=='s') {
         indietro();
      }else if (str=='e') {
-        avanti(12600);
+        anticollisione = ATTIVATO;
+        Serial.print( F("Anticollisione attivata automaticamente"));
+        avanzamento_continuo();
+        
      }else if (str=='q') {
         avanti(525);
-//     }else if (str=='stop') {
-//        forward(STOP);
-//        Serial.println( F("Stop"));
-     }else if(str=='3')
-      {
-        if(faro == DISATTIVATO){
-          pwm.setPWM(12, 4096, 0);
-          faro = ATTIVATO;
-          Serial.println( F("Faro attivato"));
-        }else if(faro == ATTIVATO){
-          pwm.setPWM(12, 0, 4096);
-          faro = DISATTIVATO;
-          Serial.println( F("Faro disattivato"));
-        }
-      }else if (str=='z') {
+     }else if (str=='z') {
         if(precisione_sterzo <10)
         {
         precisione_sterzo++;
@@ -898,51 +1058,48 @@ void sterzo_posteriore(uint16_t pulselen)
         if(ruote_sterzanti_post == ATTIVATO && ruote_sterzanti_ant == ATTIVATO)
         {
             ruote_sterzanti_post = DISATTIVATO;
-            Serial.print( F("Sterzo posteriore disattivato"));
+            sterzo(STERZO_DRITTO);
+            Serial.println( F("Sterzo posteriore disattivato"));
             
         }else if(ruote_sterzanti_post == DISATTIVATO)
         {
             ruote_sterzanti_post = ATTIVATO;
-            Serial.print( F("Sterzo posteriore attivato"));
-        }else {Serial.print( F("Impossibile disattivare lo sterzo posteriore: attiva lo sterzo anteriore per disattivare il posteriore"));}
-     }else if (str=='5') {
-        if(ruote_sterzanti_ant == ATTIVATO && ruote_sterzanti_post == ATTIVATO)
-        {
-            ruote_sterzanti_ant = DISATTIVATO;
-            Serial.print( F("Sterzo posteriore disattivato"));
-            
-        }else if(ruote_sterzanti_ant == DISATTIVATO)
-        {
-            ruote_sterzanti_ant = ATTIVATO;
-            Serial.print( F("Sterzo posteriore attivato"));
-        }else {Serial.print( F("Impossibile disattivare lo sterzo anteriore: attiva lo sterzo posteriore per disattivare l'anteriore"));}
+            Serial.println( F("Sterzo posteriore attivato"));
+        }else {Serial.println( F("Impossibile disattivare lo sterzo posteriore: attiva lo sterzo anteriore per disattivare il posteriore"));}
+//     }else if (str=='5') {
+//        if(ruote_sterzanti_ant == ATTIVATO && ruote_sterzanti_post == ATTIVATO)
+//        {
+//            ruote_sterzanti_ant = DISATTIVATO;
+//            sterzo(STERZO_DRITTO);
+//            Serial.println( F("Sterzo anteriore disattivato"));
+//            
+//        }
+//     } else if(ruote_sterzanti_ant == DISATTIVATO)
+//        {
+//            ruote_sterzanti_ant = ATTIVATO;
+//            Serial.println( F("Sterzo anteriore attivato"));
+//        }else {Serial.println( F("Impossibile disattivare lo sterzo anteriore: attiva lo sterzo posteriore per disattivare l'anteriore"));}
      }else if (str=='pannello_sx') {
         left_panel();
+     }else if (str=='0') {
+        radar_position = radar_position - 10;
+        radar_motor(radar_position);
+        Serial.print( F("Posizione RADAR: "));
+        Serial.println(radar_position);
+     }else if (str=='9') {
+        radar_position = radar_position + 10;
+        radar_motor(radar_position);
+        Serial.print( F("Posizione RADAR: "));
+        Serial.println(radar_position);
      }else if (str=='p') {
-        open_panels();
+        radar_update();
+        if(radar_dx_ant > 20 && radar_dx_center > 20 && radar_sx_ant > 20 && radar_sx_center > 20)
+            open_panels();
+        else Serial.println(F("Possibili ostacoli ai lati del rover"));
      }else if (str=='o') {
         close_panels();
      }else if(str=='r') {
-            //uint16_t radar_delay = 200;
-            Serial.println(F("+=============|RADAR|================="));
-            Serial.print(F("|          A: "));
-            Serial.print(hc.dist(0));
-            Serial.println(F("cm"));
-            Serial.println(F("|"));
-            delay(radar_delay);
-            Serial.print(F("|S: "));
-            Serial.print(hc.dist(3));
-            Serial.print(F("cm    |   "));
-            delay(radar_delay);
-            Serial.print(F("D: "));
-            Serial.print(hc.dist(2));
-            Serial.println(F("cm"));
-            Serial.println(F("|"));
-            delay(radar_delay);
-            Serial.print(F("|          D: "));
-            Serial.print(hc.dist(1));
-            Serial.println(F("cm"));
-            Serial.println(F("+======================================"));
+        radar_s();
        }else if(str=='t') {
       Serial.print(F("|   "));
       for(int i = 0; i<13; i++)
@@ -970,16 +1127,47 @@ void sterzo_posteriore(uint16_t pulselen)
              webcam_sterzo = DISATTIVATO;
              Serial.println(F("Webcam Sterzo disattivato"));
          }
+     }else if (str=='5') {
+        if(anticollisione == DISATTIVATO)
+          {
+              anticollisione = ATTIVATO;
+              Serial.println(F("Anticollisione attivata"));
+          }
+        else if(anticollisione = ATTIVATO)
+         {
+             anticollisione = DISATTIVATO;
+             Serial.println(F("Anticollisione disattivata"));
+         }
      }else if(str=='4') {
         _webcam_sterzo(330);
      }else if(str=='2') {
         sterzo_dritto();
+     }else if (str=='6') {
+        if(sterzo_automatico == DISATTIVATO)
+          {
+              sterzo_automatico = ATTIVATO;
+              Serial.println(F("Sterzo automatico attivato"));
+          }
+        else if(sterzo_automatico = ATTIVATO)
+         {
+             sterzo_automatico = DISATTIVATO;
+             Serial.println(F("Sterzo automatico disattivato"));
+         }
      }/**/else if (str=='n') 
         {
-          peso_a_sinistra();
+          radar_update();
+        if(radar_sx_ant > 20 && radar_sx_center > 20)
+            peso_a_sinistra();
+        else Serial.println(F("Possibili ostacoli a sinistra del rover"));
+          
         }else if (str=='m') 
             {
-                peso_a_destra();
+        radar_update();
+        if(radar_dx_ant > 20 && radar_dx_center > 20)
+            peso_a_destra();
+        else Serial.println(F("Possibili ostacoli a sinistra del rover"));
+              
+                
         }else if (str=='b') 
             {
                 if(risparmio_energetico == DISATTIVATO)
@@ -993,64 +1181,63 @@ void sterzo_posteriore(uint16_t pulselen)
                     }
         }else if (str=='i') 
             {
+                if(webcam_sinistra_destra > 235 && webcam_sinistra_destra < 355 && webcam_sopra_sotto + 15 > 435){
+                    Serial.println(F("Movimento massimo camera raggiunto"));
+                }else{
                 webcam_sopra_sotto = webcam_sopra_sotto+15;
+               // webcam_sopra_sotto_old = webcam_sopra_sotto;
                 webcam_control();
                 webcam_Y--;
                 Serial.print(F("Posizione webcam ( "));
-                Serial.print(webcam_X);
+                Serial.print(webcam_sinistra_destra);
                 Serial.print(F(", "));
-                Serial.print(webcam_Y);
+                Serial.print(webcam_sopra_sotto);
                 Serial.println(F(" )"));
+                }
                 
         }else if (str=='k') 
             {
+//                if(webcam_sopra_sotto_effettuato == 0 && webcam_sopra_sotto_old > 435)
+//                {
+//                  webcam_sopra_sotto_effettuato = 1;
+//                }
                 webcam_sopra_sotto = webcam_sopra_sotto-15;
+                //webcam_sopra_sotto_old = webcam_sopra_sotto;
                 webcam_control();
                 webcam_Y++;
                 Serial.print(F("Posizione webcam ( "));
-                Serial.print(webcam_X);
+                Serial.print(webcam_sinistra_destra);
                 Serial.print(F(", "));
-                Serial.print(webcam_Y);
+                Serial.print(webcam_sopra_sotto);
                 Serial.println(F(" )"));
             
         }else if (str=='l') 
             {
-                webcam_sinistra_destra = webcam_sinistra_destra-20;
+                webcam_sinistra_destra = webcam_sinistra_destra-15;
                 webcam_control();
                 webcam_X++;
                 Serial.print(F("Posizione webcam ( "));
-                Serial.print(webcam_X);
+                Serial.print(webcam_sinistra_destra);
                 Serial.print(F(", "));
-                Serial.print(webcam_Y);
+                Serial.print(webcam_sopra_sotto);
                 Serial.println(F(" )"));
                 
         }else if (str=='j') 
             {
-                webcam_sinistra_destra = webcam_sinistra_destra+20;
+                webcam_sinistra_destra = webcam_sinistra_destra+15;
                 webcam_control();
                 webcam_X--;
                 Serial.print(F("Posizione webcam ( "));
-                Serial.print(webcam_X);
+                Serial.print(webcam_sinistra_destra);
                 Serial.print(F(", "));
-                Serial.print(webcam_Y);
+                Serial.print(webcam_sopra_sotto);
                 Serial.println(F(" )"));
                 
-            }
-//        }else if (str=='6') 
-//            {
-//               rover_speed = rover_speed + 10;
-//               Serial.print(F("Velocità rover aumentata"));
-//        
-//        }else if (str=='5') 
-//            {
-//               rover_speed = rover_speed - 10; 
-//               Serial.print(F("Velocità rover diminuita")); 
-//        
-//        }
-          else if (str=='h') {
+            }else if (str=='h') {
           //DA AGGIORNARE
-        Serial.println( F("SilverRover"));
-        Serial.println( F("Ver. 1.0.1 (Aggiunta possibilità di disattivare i singoli sterzi ant e post"));
+        Serial.println( F("SilverRover 1.2.0"));
+        Serial.println( F("Ver. 1.1.0 (Sterzo Posteriore. disatt. di default, avanzamento continuo con E, modalità radar aggiornata)"));
+        Serial.println( F("Ver. 1.2.0 (Aggiunto angolo di Ackermann, sterzo automatico per evitare gli ostacoli, controllo ostacoli prima di aprire i pannelli)"));
         Serial.println( F("COMANDI DISPONIBILI:"));
         Serial.println( F("1)  |w||a||s||d|: avanti, sterza a sinistra, sterza a destra, indietro"));
         Serial.println( F("2)  |i||j||k||l|: pan/til webcam"));
@@ -1067,10 +1254,15 @@ void sterzo_posteriore(uint16_t pulselen)
         Serial.println( F("13) |x|: aumenta la precisione dello sterzo aumentando gli step di sterzata"));
         Serial.println( F("14) |1|: se abilitato, la webcam ruoterà insieme alle ruote anteriori"));
         Serial.println( F("15) |2|: posizione lo sterzo dritto (valore: 340)"));
-        Serial.println( F("16) |3|: attiva faro infrarosso"));
+//        Serial.println( F("16) |3|: attiva faro infrarosso"));
         Serial.println( F("17) |4|: attiva/disattiva lo sterzo anteriore (default: ATTIVATO)"));
         Serial.println( F("18) |5|: attiva/disattiva lo sterzo posteriore (default: ATTIVATO)"));
-     }/**/else{
+     }//else if(radar_alarm())
+//     {  
+//        Serial.println( F("RADAR ALARM!"));
+//        forward(STOP);
+//     }
+      /**/else{
         Serial.println( F("Comando sconosciuto...riprova"));
      }
       //pwm.setPWM(0, 0, pulselen);
@@ -1078,7 +1270,56 @@ void sterzo_posteriore(uint16_t pulselen)
 //      if(risparmio_energetico == ATTIVATO)
 //        pca_on_off();
    }
-   delay(400);
+   if(anticollisione == ATTIVATO)
+   {
+   if(radar_ant_alarm())
+     {  
+        Serial.println( F("RADAR ANT ALARM!"));
+        forward(STOP);
+     }
+     if(radar_sx_alarm()==true)
+     {  
+        uint16_t pos_sterzo_aus;
+        Serial.println( F("RADAR SX ALARM!"));
+//        while(radar_sx_alarm())
+//        { && posizione_sterzo < 330
+        if(sterzo_automatico == ATTIVATO)
+        {
+        posizione_sterzo = 440;
+                sterzo(posizione_sterzo);
+                Serial.print( F("Sterzo: "));
+                Serial.println(posizione_sterzo/*posizione_sterzo*/);
+        //}
+        delay(1500);
+        posizione_sterzo = DRITTO;
+        sterzo(posizione_sterzo);
+        }else forward(STOP);
+     }
+     if(radar_dx_alarm())
+     {  
+        uint16_t pos_sterzo_aus = posizione_sterzo;
+        Serial.println( F("RADAR DX ALARM!"));
+//        while(radar_dx_alarm())
+//         && posizione_sterzo >330
+        if(sterzo_automatico == ATTIVATO)
+        {
+        posizione_sterzo = 220;
+                sterzo(posizione_sterzo);
+                Serial.print( F("Sterzo: "));
+                Serial.println(posizione_sterzo/*posizione_sterzo*/);
+        //}
+        delay(1500);
+        posizione_sterzo = DRITTO;
+        sterzo(posizione_sterzo);
+        }else forward(STOP);
+     }
+     if(radar_post_alarm())
+     {  
+        Serial.println( F("RADAR POST ALARM!"));
+        forward(STOP);
+     }
+   }
+   delay(200);
   }
 
      
