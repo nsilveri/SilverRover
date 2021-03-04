@@ -18,6 +18,10 @@ CURRENT FEATURES
     - radar scan with motorised front sensor like a radar -> OK
     - battery recharge from solar panels (NOW WORKS)
     
+    2) Orange Pi / Raspberry part
+    - installed minicom used to send serial comands
+    - installed https://elinux.org/RPi-Cam-Web-Interface to stream video
+    
     24/01/2021
     1) Radar alert: every loop Arduino ask distance to all HC-SR04 and if one of this distance is <20, alert is true; this function is used to STOP the rover while it is       running; this feature can be disabled pressing 5 key.
     2) Added continuos running pressing E key: the rover run forward until the user press back key (S key on keyboard) or the radar alert income, the user can use all functions( right, left,....) while the rover is running.
@@ -29,14 +33,14 @@ CURRENT FEATURES
     20/02/2021
         - [POWER ENERGY UNIT] Added 2 Waveshare Solar Power Management Module with a 5000mA battery for each, one battery for Arduino and PCA9685 module, one battery for        Raspberry Pi 2 and Camera
         - [POWER ENERGY UNIT] positioned higher
+    
     27/02/2021
         - I put my phone with hotspot on the rover and used the software "remoteit" to connect remotely with SSH and Cam Website, it works very well without lags (i used an S8           with 4G conection). I just bought a 4G Dongle USB, i will try with it
     
-2) Orange Pi / Raspberry part
-    - installed minicom used to send serial comands
-    - installed https://elinux.org/RPi-Cam-Web-Interface to stream video
     
-    TO DO
+    TO DO:
+        
+        
         OLD:
         +=================================================+
         |     - Solar battery charge capability |OK|      |
