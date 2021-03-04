@@ -20,7 +20,7 @@ CURRENT FEATURES
     
  2) Orange Pi / Raspberry part
     - installed [https://www.acmesystems.it/minicom] used to send serial comands.
-    - installed [https://elinux.org/RPi-Cam-Web-Interface to stream video].
+    - installed [https://elinux.org/RPi-Cam-Web-Interface] to stream video.
     - installed and configurated [https://remote.it/] to connect to the SSH and Camera Website service via 4G.
     
     
