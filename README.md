@@ -1,6 +1,6 @@
 # SilverRover
-A small Rover made with 2 DVD cases, 5 servomotors (Servo 9G), 4 rotary servomotors (Servo 9G R), 2 solar panels (5v 500mA + 5v 500mA) managed by 2 Servo 9G each and 4 hcsr-04, with the sensor front motorized with 1 of 5 9G Servos, a Raspberry Pi Camera with IR for night vision, 2 power banks with 5000mAh;
-all this driven by Arduino which receives commands from a Raspbery Pi via USB Serial, the Raspberry Pi receives commands via SSH
+A small Rover made with 2 DVD cases, 5 servomotors (Servo 9G), 4 rotary servomotors (Servo 9G R), 2 solar panels (5v 500mA + 5v 500mA) managed by 2 Servo 9G each and 4 hcsr-04, with the sensor front motorized with 1 of 5 9G Servos, a Raspberry Pi Camera with IR for night vision, 2 Waveshare Solar Power Management Module with 5000mA battery for each;
+all this driven by Arduino which receives commands from a Raspbery Pi via USB Serial, the Raspberry Pi receives commands via SSH.
 
 
 
@@ -8,19 +8,20 @@ all this driven by Arduino which receives commands from a Raspbery Pi via USB Se
 
 CURRENT FEATURES
 1) Arduino
-    - Forward -> OK
-    - Back -> OK
-    - turn right with 11 different angle  (NEW)
-    - turn right with 11 different angle  (NEW) 
-    - open both solar panels -> OK 
-    - close both solar panels -> OK
-    - radar scan with all 4 HCSR-04 -> OK
-    - radar scan with motorised front sensor like a radar -> OK
-    - battery recharge from solar panels (NOW WORKS)
+    - Forward. -> OK
+    - Back. -> OK
+    - turn right with 11 different angle.  (NEW)
+    - turn right with 11 different angle.  (NEW) 
+    - open both solar panels. -> OK 
+    - close both solar panels. -> OK
+    - radar scan with all 4 HCSR-04. -> OK
+    - radar scan with motorised front sensor like a radar. -> OK
+    - battery recharge from solar panels. (NOW WORKS)
     
  2) Orange Pi / Raspberry part
-    - installed minicom used to send serial comands
-    - installed https://elinux.org/RPi-Cam-Web-Interface to stream video
+    - installed [https://www.acmesystems.it/minicom] used to send serial comands.
+    - installed [https://elinux.org/RPi-Cam-Web-Interface to stream video].
+    - installed and configurated [https://remote.it/] to connect to the SSH and Camera Website service via 4G.
     
     
   UPGRADES:
