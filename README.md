@@ -2,6 +2,8 @@
 
 ![alt text](https://github.com/nsilveri/SilverRover/blob/main/photo_2021-06-26_22-21-18.jpg)
 
+https://github.com/nsilveri/SilverRover/blob/main/Incontro%20col%20gatto%20540P.mp4
+
 A small Rover made with 2 DVD cases, 5 servomotors (Servo 9G), 4 rotary servomotors (Servo 9G R), 2 solar panels (5v 500mA + 5v 500mA) managed by 2 Servo 9G each and 4 hcsr-04, with the sensor front motorized with 1 of 5 9G Servos, a Raspberry Pi Camera with IR for night vision, 2 Waveshare Solar Power Management Module with 5000mA battery for each;
 all this driven by Raspberry Pico which receives commands from a Raspbery Pi via USB Serial, the Raspberry Pi receives commands via SSH.
 
