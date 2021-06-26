@@ -1,6 +1,6 @@
 # SilverRover
 A small Rover made with 2 DVD cases, 5 servomotors (Servo 9G), 4 rotary servomotors (Servo 9G R), 2 solar panels (5v 500mA + 5v 500mA) managed by 2 Servo 9G each and 4 hcsr-04, with the sensor front motorized with 1 of 5 9G Servos, a Raspberry Pi Camera with IR for night vision, 2 Waveshare Solar Power Management Module with 5000mA battery for each;
-all this driven by Arduino which receives commands from a Raspbery Pi via USB Serial, the Raspberry Pi receives commands via SSH.
+all this driven by Raspberry Pico which receives commands from a Raspbery Pi via USB Serial, the Raspberry Pi receives commands via SSH.
 
 
 
@@ -10,7 +10,7 @@ CURRENT FEATURES
 1) Arduino
     - Forward. -> OK
     - Back. -> OK
-    - turn right with 11 different angle.  (NEW)
+    - turn right.
     - turn right with 11 different angle.  (NEW) 
     - open both solar panels. -> OK 
     - close both solar panels. -> OK
@@ -45,27 +45,44 @@ CURRENT FEATURES
    
     1) I put my phone with hotspot on the rover and used the software "remoteit" to connect remotely with SSH and Cam Website, it works very well without lags (i used an S8           with 4G conection). I just bought a 4G Dongle USB, i will try with it
 
+   26/06/2021
+   
+    1) Switched from Raspberry Pi 2 to Raspberry Pi Zero to reduce battery consumption
+    2) Switched from Arduino Nano to Raspberry Pico
+    3) Switched from HC-SR04 to front and center position with Lidar sensor, the rear sensor remains HCSR-04
+    4) Now the rover uses the second core on Pico,
+    core0 (to the manager commands received by Serial from Rapberry Pi Zero), core1 (manage the Lidar sensor to update the distances around the rover,
+    core0 will read the distances and handle the situation based on the distances)
+    5) Added the "Skirt wall" function to make the rover able to automatically steer to always keep the same distance from a side wall as it advances
+    6) Added Ackermann angle
+    7) Added support for 4G Wingle to connect to the rover via 4G allowing you to go anywhere without limits due to the range of the WiFi connection
+    8) Added slot to insert an additional 2500mAh power bank inside the Rover to power the 4G Wingle separately
+    9) Added module to read the battery voltage
+    10) The PCA9685 module is now connected to I2C0, managed by core0 while the Lidar sensors are connected to I2C1 managed by core1
+
+    I will update the photos as soon as possible
     
    TO DO:
         
         
         OLD:
-        +=================================================+
-        |     - Solar battery charge capability |OK|      |
-        |                                                 |
-        |    - Put battery position higher     |OK|       |
-        +=================================================+
+        +===============================================================================+
+        |     - Solar battery charge capability |OK|                                    |
+        |                                                                               |
+        |     - Put battery position higher     |OK|                                    |
+        |                                                                               |
+        |     - 4G connection to control rover with a teorically infinite distance |OK| |
+        |                                                                               |
+        |     - Battery monitoring voltage |OK|                                         |
+        +===============================================================================+
         
         CURRENT:
-        +===============================================================================================+
-        |     - 4G connection to control rover with a teorically infinite distance                      |
-        |           I will use an USB Dongle 4G, for now i tested with phone on it with hotspot         |                    |
-        +===============================================================================================+
+        +======================+
+        |    Nothing for now   |
+        +======================+
         
         NEW:
-        +=====================================================================================+
-        |     - add active suspension with 8 SG90 servomotors (another PCA9685 needed)        |
-        |                                                                                     |
-        |     - make arduino capable to monitoring the 2 battery power                        |
-        +=====================================================================================+
+        +======================+
+        |    Nothing for now   |
+        +======================+
     
