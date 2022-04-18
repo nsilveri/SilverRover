@@ -1,0 +1,1143 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>PiRover</title>
+<script src="mqtt.min.js"></script>
+<script src="jquery.min.js"></script>
+<style>
+* {font-family: monospace; font-size: 1em; text-align: center; color: white;}
+* {-webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;}
+* {margin: 0px; padding: 0px; box-sizing: border-box;}
+body {background-color: black; background-size: 100vw 100vh; background-repeat: no-repeat;}
+.label_power_main_title {opacity: 0.5; color: white; background-color: black; width: 9cm; height: 0.7cm; border: 0.1cm solid white; font-size: 0.3cm;}
+.label_power_title {opacity: 0.5; color: white; background-color: black; width: 4.65cm; height: 0.7cm; border: 0.1cm solid white; font-size: 0.3cm;}
+.label_battery {opacity: 0.5; color: white; background-color: black; width: 1.4cm; height: 0.7cm; border: 0.1cm solid white; font-size: 0.3cm;}
+.label_battery_watt {opacity: 0.5; color: white; background-color: black; width: 1.4cm; height: 0.7cm; border: 0.1cm solid white; font-size: 0.3cm;}
+.label_battery_title {opacity: 0.5; color: white; background-color: black; width: 2.85cm; height:0.7cm; border: 0.1cm solid white; font-size: 0.3cm;}
+.label_sys_msg_title {opacity: 0.5; color: white; background-color: black; width: 5.65cm; height:0.7cm; border: 0.1cm solid white; font-size: 0.3cm;}
+.label_solar_title {opacity: 0.5; color: white; background-color: black; width: 4.65cm; height: 0.7cm; border: 0.1cm solid white; font-size: 0.3cm;}
+.label_power {opacity: 0.5; color: white; background-color: black; width: 1.5cm; height: 0.7cm; border: 0.1cm solid white; font-size: 0.3cm;}
+.label_STATUS {opacity: 0.5; color: white; background-color: black; width: 3cm; height: 3cm; border: 0.1cm solid white; font-size: 0.3cm;}
+.label_radar_title {opacity: 0.5; color: white; background-color: black; width: 3cm; height: 0.5cm; border: 0.1cm solid white; font-size: 0.3cm;}
+.label_radar {opacity: 0.5; color: white; background-color: black; width: 0.96cm; height: 1cm; border: 0.1cm solid white; font-size: 0.3cm;}
+.button {opacity: 0.2; color: white; background-color: black; width: 1.5cm; height: 1.5cm; border: 0.1cm solid white; font-size: 1cm;}
+.button_all_LR {opacity: 0.2; color: white; background-color: black; width: 1.5cm; height: 0.75cm; border: 0.1cm solid white; font-size: 0.5cm;}
+.button_trimmer {opacity: 0.2; color: white; background-color: black; width: 1.5cm; height: 0.75cm; border: 0.1cm solid white; font-size: 0.5cm;}
+.button_cam {opacity: 0.2; color: white; background-color: black; width: 1.5cm; height: 0.75cm; border: 0.1cm solid white; font-size: 0.3cm;}
+.button_setting {opacity: 0.5; color: white; background-color: black; width: 1cm; height: 1cm; border: 0.1cm solid white; font-size: 0.5cm;}
+.button_wireless_signal {opacity: 0.5; color: white; background-color: black; width: 3cm; height: 0.6cm; border: 0.1cm solid white; font-size: 0.3cm;}
+.button:hover {color: gray; background-color: black; border: 0.1cm solid gray;}
+.button:active {color: black; background-color: white; border: 0.1cm solid white;}
+</style>
+</head>
+<body>
+
+<div>
+	<table style="float:left;">
+		<tr>
+			<td><p id="wifi_SSID"></p><div class="button_wireless_signal"><p id="wifi_signal_level_label"></p></div></td>
+		</tr>
+		<tr>
+			<td><div class="button_wireless_signal"><p id="wifi_quality_label"></p></div></td>
+		</tr>
+
+	</table>
+
+	<table style="position: fixed; bottom: 0px;">
+		<tr>
+			<td></td>
+			<td>steer<div class="button_trimmer"><p id="steer_value_label"></p></div></td>
+			<td></td>
+		</tr>
+		<tr>
+			<td><div class="button_trimmer" onmousedown="move(18)" ontouchstart="move(18)">-</div></td>
+			<td><div class="button_trimmer"><p id="motor_speed_label"></p></div></td>
+			<td><div class="button_trimmer" onmousedown="move(17)" ontouchstart="move(17)">+</div></td>
+			<td>
+				<table>
+					<td><div class="label_sys_msg_title"><p id="sys_msg_label"></p></div></td>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td><div class="button" onmousedown="move(7)" ontouchstart="move(7)">⬆</div></td>
+			<td><div class="button" onmousedown="move(8)" ontouchstart="move(8)">⬆</div></td>
+			<td><div class="button" onmousedown="move(9)" ontouchstart="move(9)">⬆</div></td>
+			<td>
+				<table>
+					<td><div class="label_battery_title">BATTERY</p></div></td>
+					<td><div class="label_battery"><p id="battery_percentage_label"></p></div></td>
+					<td><div class="label_battery"><p id="battery_remaining_time_label"></p></div></td>
+				</table>
+				<table>
+					<tr>
+						<td><div class="label_battery"><p id="battery_voltage_label"></p></div></td>
+						<td><div class="label_battery"><p id="battery_current_label"></p></div></td>
+						<td><div class="label_battery_watt"><p id="battery_watt_label"></p></div></td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td><div class="button" onmousedown="move(4)" ontouchstart="move(4)">⇐</div></td>
+			<td><div class="button" onmousedown="cam(5)"  ontouchstart="stop()">🛑</div></td>
+			<td><div class="button" onmousedown="move(6)" ontouchstart="move(6)">⇒</div></td>
+			<td>
+				<table>
+					<div class="label_power_title">SOLAR PANELS</p></div>
+				</table>
+				
+				<table>
+					<tr>
+						<td><div class="label_power"><p id="solar_voltage_label"></p></div></td>
+						<td><div class="label_power"><p id="solar_current_label"></p></div></td>
+						<td><div class="label_power"><p id="solar_watt_label"></p></div></td>
+					</tr>
+				</table>
+			</td>
+			<td>
+				<td><div class="button_setting" onclick="radar_on_off()">📡</div></td>
+				<td><div class="button_setting" onclick="solar()">☀️</div></td>
+				<td><div class="button_setting" onclick="fws()">4WS 󠁢</div></td>
+				<td><div class="button_setting" onclick="move(19)">🔋</div></td>
+			</td>
+		</tr>
+		<tr>
+			<td>
+				<table>
+					<tr>
+						<div class="button_trimmer" onmousedown="move(15)" ontouchstart="move(15)">⇐⇐</div>
+					</tr>
+					<tr>
+						<div class="button_trimmer" onmousedown="move(12)" ontouchstart="move(12)">⬋</div>
+					</tr>
+				</table>
+			</td>
+			<td><div class="button" onmousedown="move(2)" ontouchstart="move(2)">⬇</div></td>
+			<td>
+				<table>
+					<tr>
+						<div class="button_trimmer" onmousedown="move(16)" ontouchstart="move(16)">⇒⇒</div>
+					</tr>
+					<tr>
+						<div class="button_trimmer" onmousedown="move(13)" ontouchstart="move(13)">⬊</div>
+					</tr>
+				</table>
+			</td>
+			<td>
+				<table>
+					<td>
+						<div class="label_power_title">ROVER POWER</p></div>
+						<table>
+							<tr>
+								<td><div class="label_power"><p id="rover_voltage_label"></p></div></td>
+								<td><div class="label_power"><p id="rover_current_label"></p></div></td>
+								<td><div class="label_power"><p id="rover_watt_label"></p></div></td>
+							</tr>
+						</table>
+					</td>	
+				</table>
+			</td>
+			<td>
+				<td><div class="button_setting" onclick="fullscreen()">🖵</div></td>
+				<td><div class="button_setting" onclick="cam_steer()">📷</div></td>
+				<td><div class="button_setting" onclick="cam_steer()">🖥️</div></td>
+				<td><div class="button_setting" onclick="reset_telemetry()">↺</div></td>
+			</td>
+			
+		</tr>
+	</table>
+
+	
+	
+	<table style="float:right;">
+		<tr>
+			<td><div class="button" onclick="cam(7)">⇖</div></td>
+			<td><div class="button" onclick="cam(2)">⇑</div></td>
+			<td><div class="button" onclick="cam(9)">⇗</div></td>
+		</tr>
+		<tr>
+			<td><div class="button" onclick="cam(4)">⇐</div></td>
+			<td><div class="button" onclick="cam(5)">⛔</div></td>
+			<td><div class="button" onclick="cam(6)">⇒</div></td>
+		</tr>
+		<tr>
+			<td><div class="button" onclick="cam(1)">⇙</div></td>
+			<td><div class="button" onclick="cam(8)">⇓</div></td>
+			<td><div class="button" onclick="cam(3)">⇘</div></td>
+		</tr>
+		<tr>
+			<td><div class="button_all_LR" onclick="cam(10)">⇐⇐</div></td>
+			<td><div class="button_cam"><p id="cam_pos_label"></p></div></td>
+			<td><div class="button_all_LR" onclick="cam(11)">⇒⇒</div></td>
+		</tr>
+	</table>
+	<table style="float:right;">
+		<tr>
+				<td>
+					<div class="label_radar_title">RADAR</p></div>
+					<table>
+						<tr>
+							<td><div class="label_radar"><p id="radar_45_left_label"></p>cm</div></td>
+							<td><div class="label_radar"><p id="radar_front_label"></p>cm</div></td>
+							<td><div class="label_radar"><p id="radar_45_right_label"></p>cm</div></td>
+						</tr>
+						<tr>
+							<td><div class="label_radar"><p id="radar_center_left_label"></p>cm</div></td>
+							<td><div class="label_radar"></p></div></td>
+							<td><div class="label_radar"><p id="radar_center_right_label"></p>cm</div></td>
+						</tr>
+					</table>	
+				</td>	
+		</tr>
+	</table>
+	</table>
+	
+	<div id="status"><b style="color:yellow;">CONNECTING...</b></div>
+</div>
+
+<script>
+
+function createRemap(x, inMin, inMax, outMin, outMax) {
+    return function remaper(x) {
+        return (x - inMin) * (outMax - outMin) / (inMax - inMin) + outMin;
+    };
+}
+
+var sys_alert_counter = 0;
+var sys_alert_blinking = 0;
+
+function sys_msg_parse(evt) {
+		var dataStr = [];
+		dataStr = evt;
+		//console.log(evt);
+		// Series idx 0=Temp idx 1=Hum 
+		//const obj = JSON.parse(dataStr);
+		//solar_first_time = false;
+		console.log(sys_msg = dataStr);//obj.rf;
+		document.getElementById("sys_msg_label").innerHTML = '<b style="color:yellow;">' + sys_msg;
+		/*
+		if(sys_alert_counter <= 5)
+		{
+			if(sys_alert_blinking == 0)
+			{
+				document.getElementById("sys_msg_label").innerHTML = '<b style="color:yellow;">' + sys_msg;
+				sys_alert_blinking = 1;
+			}else if(sys_alert_blinking == 1)
+			{
+				document.getElementById("sys_msg_label").innerHTML = '<b style="color:green;">' + sys_msg;
+				sys_alert_blinking = 0;
+			}
+			sys_alert_counter = sys_alert_counter + 1;
+		}else if(sys_alert_counter == 5)
+		{
+			sys_alert_counter = 0;
+			sys_msg = '';
+			document.getElementById("sys_msg_label").innerHTML = sys_msg;
+		}
+		*/
+		//document.getElementById("radar_45_left_label").innerHTML = radar_45_left;
+		//document.getElementById("radar_45_right_label").innerHTML = radar_45_right;
+		//document.getElementById("radar_center_left_label").innerHTML = radar_center_left;
+		//document.getElementById("radar_center_right_label").innerHTML = radar_center_right;
+	};
+
+function radar_parse(evt) {
+		var dataStr = [];
+		dataStr = JSON.stringify(evt).split(",");
+		// Series idx 0=Temp idx 1=Hum 
+		//const obj = JSON.parse(dataStr);
+		solar_first_time = false;
+		console.log(radar_front = Math.round(dataStr[0].slice(1, )));//obj.rf;
+		console.log(radar_45_left = Math.round(parseInt(dataStr[1])));//obj.r45l;
+		console.log(radar_45_right = Math.round(dataStr[2]));//obj.r45r;
+		console.log(radar_center_left = Math.round(dataStr[3]));//obj.rs;
+		console.log(radar_center_right = Math.round(dataStr[4].slice(0,3)));//obj.rd;
+
+		document.getElementById("radar_front_label").innerHTML = radar_front;
+		document.getElementById("radar_45_left_label").innerHTML = radar_45_left;
+		document.getElementById("radar_45_right_label").innerHTML = radar_45_right;
+		document.getElementById("radar_center_left_label").innerHTML = radar_center_left;
+		document.getElementById("radar_center_right_label").innerHTML = radar_center_right;
+	};
+	var BatVar;
+	color_battery = "";
+
+	function energy_power_parse(evt) {
+		var dataStr = [];
+		dataStr = JSON.stringify(evt).split(",");
+		solar_first_time = false;
+		console.log(battery_voltage = parseFloat(dataStr[9]));//.slice(1, )));//obj.v_1;
+		console.log(battery_current = Math.round((parseFloat(dataStr[10]))));//.slice(1, )));//obj.v_1;
+		console.log(battery_percentage = parseFloat(dataStr[5]));//obj.v_1;
+		console.log(solar_voltage = parseFloat(dataStr[1]));//obj.v_2;
+		console.log(solar_current = Math.round(parseFloat(dataStr[2])));//obj.a_2;
+		console.log(rover_voltage = parseFloat(dataStr[3]));//obj.v_3;
+		console.log(rover_current = Math.round(parseFloat(dataStr[4])));//obj.a_3;
+		console.log(solar_watt = parseFloat(dataStr[6]));//obj.a_3;
+		console.log(rover_watt = parseFloat(dataStr[7]));
+		console.log(battery_watt = (battery_voltage * battery_current) / 1000);//parseFloat(dataStr[8]));
+		console.log(battery_HH = dataStr[12]);
+		console.log(battery_MM = Math.round(parseFloat(dataStr[13])));
+		//console.log(panels_on_off = Math.round(parseFloat(dataStr[13])));
+		solar_panel_status = 0;
+		console.log(steer_value = parseInt(dataStr[10]));//obj.steer_pos;
+		//console.log(run_value = dataStr[11]);//obj.run;
+		solar_panel_radar_warning = 0;
+		document.getElementById("battery_voltage_label").innerHTML = battery_voltage + " V"; 
+		document.getElementById("battery_percentage_label").innerHTML = battery_percentage + " %";
+		document.getElementById("battery_remaining_time_label").innerHTML = battery_HH + "h " + battery_MM + "m";
+		if(battery_current >= 0)
+		{		
+			document.getElementById("battery_current_label").innerHTML = '<b style="color:yellow;">' + battery_current + " mA" + '</b>'; //net.innerHTML = '<b style="color:lime;">CONNECTED' + connection_type + '</b>';
+		}else
+		{
+			document.getElementById("battery_current_label").innerHTML = '<b style="color:lime;">' + battery_current + " mA" + '</b>'; //net.innerHTML = '<b style="color:lime;">CONNECTED' + connection_type + '</b>';
+		}
+		document.getElementById("battery_watt_label").innerHTML = battery_watt.toFixed(2) + " W";
+		//document.getElementById("battery_STATUS_label").innerHTML =  battery_percentage + " % | " + battery_voltage + " V";
+		document.getElementById("solar_voltage_label").innerHTML = solar_voltage + " V";
+		document.getElementById("solar_current_label").innerHTML = solar_current + " mA";
+		document.getElementById("solar_watt_label").innerHTML = solar_watt.toFixed(2) + " W";
+		//document.getElementById("solar_STATUS_label").innerHTML =  solar_voltage + " V | " + solar_current + " mA |" + ((solar_current * solar_voltage)/1000).toFixed(2) + " W";
+		document.getElementById("rover_voltage_label").innerHTML = rover_voltage + " V";
+		document.getElementById("rover_current_label").innerHTML = rover_current + " mA";
+		document.getElementById("rover_watt_label").innerHTML = rover_watt.toFixed(2) + " W";
+	};
+
+	//function color(BatVar)
+	//{
+	//	if(BatVar.innerHTML > 0)
+	//	{
+	//		BatVar.style.color = "#ff0000";
+	//	}else 
+	//	{
+	//		BatVar.style.color = "#00ff00";
+	//	}
+	//}
+	
+
+	function motors_parse(evt) {
+		var dataStr = [];
+		dataStr = JSON.stringify(evt).split(",");
+		solar_first_time = false;
+		console.log(panels_on_off = Math.round(parseFloat(dataStr[0].slice(1, ))));
+		console.log(cam_sx_dx = Math.round(parseFloat(dataStr[1])));
+		console.log(cam_up_dn = Math.round(parseFloat(dataStr[2])));
+		console.log(rover_celsius = Math.round(parseFloat(dataStr[3])));
+		console.log(steer_value = Math.round(dataStr[4])); 
+		console.log(motor_speed = parseInt(dataStr[5]));
+		solar_panel_status = 0;
+		//steer_value = Math.round(dataStr[10]);//obj.steer_pos;
+		//console.log(run_value = dataStr[11]);//obj.run;
+		solar_panel_radar_warning = 0;
+		document.getElementById("cam_pos_label").innerHTML =  (cam_up_dn - 345) + "," + (cam_sx_dx - 299);
+		document.getElementById("motor_speed_label").innerHTML =  motor_speed + "%";
+		//document.getElementById("wifi_quality_label").innerHTML = "Quality: " + wifi_quality;
+		//document.getElementById("wifi_signal_level_label").innerHTML = "Signal: " + wifi_signal_level + " dB";
+
+	};
+
+	function wifi_status_parse(evt) {
+		var dataStr = [];
+		dataStr = JSON.stringify(evt).split(",");
+		console.log(dataStr[3]);
+		if(dataStr[3] == '0"')
+		{
+			console.log(wifi_quality = dataStr[0].slice(1, ));
+			console.log(wifi_signal_level = dataStr[1].slice(1, 3));
+			console.log(wifi_SSID = dataStr[2].slice(1, ));
+			if(wifi_quality != -1)
+			{
+				document.getElementById("wifi_quality_label").innerHTML = "Quality: " + wifi_quality;
+			}else document.getElementById("wifi_quality_label").innerHTML = "Quality: ERR" + wifi_quality;
+			if(wifi_quality != -1)
+			{
+				document.getElementById("wifi_signal_level_label").innerHTML = "Signal: " + wifi_signal_level + " dB";
+			}else document.getElementById("wifi_signal_level_label").innerHTML = "Signal: ERR";
+			document.getElementById("wifi_SSID").innerHTML = "WiFi: " + wifi_SSID;
+		}else if(dataStr[3] == '1')
+		{
+			console.log(wifi_quality = dataStr[0].slice(1, ));
+			console.log(wifi_signal_level = dataStr[1]);//.slice(1, 4));
+			console.log(wifi_SSID = "Mobile: " + dataStr[2]);
+			console.log(wifi_signal_perc = dataStr[4]);
+			document.getElementById("wifi_quality_label").innerHTML = "" + wifi_quality;
+			document.getElementById("wifi_signal_level_label").innerHTML = "ANT: " + wifi_signal_perc + " " + wifi_signal_level + "%";
+			document.getElementById("wifi_SSID").innerHTML = wifi_SSID;
+		}
+		
+
+	};
+
+//const gamepads = Array.from(navigator.getGamepads());
+
+var x_cam = 0;
+var y_cam = 0;
+var client_casual_id = Math.random().toString(16).substr(2, 8);
+const clientId_command = 'rover_command_' + client_casual_id//'mqttjs_' + Math.random().toString(16).substr(2, 8)
+const clientId_radar = 'rover_telemetry_radar_' + client_casual_id
+const clientId_energy_power = 'rover_telemetry_power_' + client_casual_id
+const clientId_motors = 'rover_telemetry_motors_' + client_casual_id
+const clientId_wifi_status = 'rover_telemetry_wifi_status_' + client_casual_id
+const clientId_js_command = 'rover_js_command_' + client_casual_id
+const clientId_sys_msg = 'rover_sys_msg_' + client_casual_id
+
+address = window.location.hostname
+console.log(address)
+host = ''
+address_analysis = JSON.stringify(address).split(".");
+local_address = '"192'
+fritz_box_url = '"odafnsupwqp8hhg4'
+console.log(local_address)
+console.log(address_analysis[0])
+port_rit = 30000//1884//
+port_rit_video = 30001
+port_rit_audio = 30002 //DA MODIFICARE
+port_loc = 1884
+port_loc_video = 8082
+port_loc_audio = 5002
+port_fritz = 8888
+port_fritz_video = 8082
+port_fritz_audio = 5002
+
+address_video = address + ':' + port_loc_video
+port_selected = 0
+connection_status = 'CONNECTING'
+if(address_analysis[0] != local_address && address_analysis[0] != fritz_box_url && address_analysis[1] != 0)
+{
+	console.log('not local address')
+	console.log(address)
+	host = 'ws://' + window.location.hostname + ':' + port_loc + '/mqtt'
+	connection_type = ' (remotely)'
+	address_video = address + ':' + port_loc_video
+	console.log(host)
+	port_selected = port_loc
+}else if(address_analysis[0] != local_address && address_analysis[0] != fritz_box_url)
+{
+	console.log('not local address')
+	console.log(address)
+	host = 'ws://' + window.location.hostname + ':' + port_rit + '/mqtt'
+	connection_type = ' (remotely)'
+	address_video = address + ':' + port_rit_video
+	address_audio = 'tcp://' + address + ':' + port_rit_audio
+	console.log(host)
+	port_selected = port_rit
+}else if(address_analysis[0] == fritz_box_url){
+	console.log('Fritz address')
+	console.log(address)
+	host = 'ws://' + window.location.hostname + ':' + port_loc + '/mqtt'
+	connection_type = ' (Fritz!Box remotely)'
+	address_video = address + ':' + port_fritz_video
+	address_audio = 'tcp://' + address + ':' + port_fritz_audio
+	console.log(host)
+	port_selected = port_fritz
+}else {
+	connection_type = '(locally)'
+	console.log('address local')
+	console.log(address)
+	host = 'ws://' + window.location.hostname + ':' + port_loc + '/mqtt'
+	//address_video = window.location.hostname + port_loc_video
+	address_audio = 'tcp://' + address + ':' + port_loc_audio
+	connection_type = ' (locally)'
+	console.log(host)
+	port_selected = port_loc
+}
+
+alert_message = JSON.stringify({action: "closed_connection"});
+
+const options_command = {
+  keepalive: 60,
+  clientId: clientId_command,
+  protocolId: 'MQTT',
+  protocolVersion: 4,
+  clean: true,
+  reconnectPeriod: 1000,
+  connectTimeout: 30 * 1000,
+  will: {
+    topic: 'ALERT',
+    payload: alert_message,
+    qos: 0,
+    retain: false
+  },
+}
+
+const options_js_command = {
+  keepalive: 60,
+  clientId: clientId_js_command,
+  protocolId: 'MQTT',
+  protocolVersion: 4,
+  clean: true,
+  reconnectPeriod: 1000,
+  connectTimeout: 30 * 1000,
+  will: {
+    topic: 'WillMsg',
+    payload: 'Connection command Closed abnormally..!',
+    qos: 0,
+    retain: false
+  },
+}
+/*
+const options_telemetry = {
+  keepalive: 60,
+  clientId: clientId_telemetry,
+  protocolId: 'MQTT',
+  protocolVersion: 4,
+  clean: true,
+  reconnectPeriod: 1000,
+  connectTimeout: 30 * 1000,
+  will: {
+    topic: 'WillMsg',
+    payload: 'Connection telemetry Closed abnormally..!',
+    qos: 0,
+    retain: false
+  },
+}
+*/
+const options_sys_msg = {
+  keepalive: 60,
+  clientId: clientId_radar,
+  protocolId: 'MQTT',
+  protocolVersion: 4,
+  clean: true,
+  reconnectPeriod: 1000,
+  connectTimeout: 30 * 1000,
+  will: {
+    topic: 'WillMsg',
+    payload: 'Connection SYS_MSG Closed abnormally..!',
+    qos: 0,
+    retain: false
+  },
+}
+
+const options_radar = {
+  keepalive: 60,
+  clientId: clientId_radar,
+  protocolId: 'MQTT',
+  protocolVersion: 4,
+  clean: true,
+  reconnectPeriod: 1000,
+  connectTimeout: 30 * 1000,
+  will: {
+    topic: 'WillMsg',
+    payload: 'Connection RADAR closed abnormally..!',
+    qos: 0,
+    retain: false
+  },
+}
+
+const options_power = {
+  keepalive: 60,
+  clientId: clientId_energy_power,
+  protocolId: 'MQTT',
+  protocolVersion: 4,
+  clean: true,
+  reconnectPeriod: 1000,
+  connectTimeout: 30 * 1000,
+  will: {
+    topic: 'WillMsg',
+    payload: 'Connection POWER closed abnormally..!',
+    qos: 0,
+    retain: false
+  },
+}
+
+const options_motors = {
+  keepalive: 60,
+  clientId: clientId_motors,
+  protocolId: 'MQTT',
+  protocolVersion: 4,
+  clean: true,
+  reconnectPeriod: 1000,
+  connectTimeout: 30 * 1000,
+  will: {
+    topic: 'WillMsg',
+    payload: 'Connection MOTORS closed abnormally..!',
+    qos: 0,
+    retain: false
+  },
+}
+
+const options_wifi = {
+  keepalive: 60,
+  clientId: clientId_wifi_status,
+  protocolId: 'MQTT',
+  protocolVersion: 4,
+  clean: true,
+  reconnectPeriod: 1000,
+  connectTimeout: 30 * 1000,
+  will: {
+    topic: 'WillMsg',
+    payload: 'Connection CONNECTION closed abnormally..!',
+    qos: 0,
+    retain: false
+  },
+}
+
+window.oncontextmenu = function(event) {event.preventDefault(); event.stopPropagation(); return false;};
+
+
+console.log('connecting mqtt client')
+const client_command = mqtt.connect(host, options_command)
+//const client_telemetry = mqtt.connect(host, options_telemetry)
+const client_battery = mqtt.connect(host, options_power)
+const client_radar = mqtt.connect(host, options_radar)
+//const client_battery = mqtt.connect(host, options_motors)
+const client_wifi = mqtt.connect(host, options_wifi)
+const client_motors = mqtt.connect(host, options_motors)
+const client_js = mqtt.connect(host, options_js_command)
+const client_sys_msg = mqtt.connect(host, options_sys_msg)
+
+
+client_command.on('error', (err) => {
+  console.log('Connection error: ', err)
+  net.innerHTML = '<b style="color:red;">RETRYING...</b>';
+  client_command.end()
+})
+
+client_command.on('reconnect', () => {
+  console.log('Reconnecting...')
+})
+
+client_command.on('connect', () => {
+  console.log('Client connected:' + clientId_command)
+  client_command.subscribe('rover_command', { qos: 0 })
+  net.innerHTML = '<b style="color:lime;">CONNECTED' + connection_type + '</b>';
+})
+
+client_command.on('message', (topic_command, message, packet) => {
+  console.log('Received Message: ' + message.toString() + '\nOn topic: ' + topic_command)
+})
+
+client_command.on('close', () => {
+  console.log(clientId_command + ' disconnected')
+})
+
+//#########################################################################
+/*
+client_telemetry.on('error', (err) => {
+  console.log('Connection error: ', err)
+  client_telemetry.end()
+})
+
+client_telemetry.on('reconnect', () => {
+  console.log('Reconnecting...')
+})
+
+client_telemetry.on('connect', () => {
+  console.log('Client connected:' + clientId_telemetry)
+  client_telemetry.subscribe('rover_telemetry_radar', { qos: 0 })
+})
+//=======================================================================================================rover_telemetry/
+client_telemetry.on('message', (topic_telemetry, message, packet) => {
+  console.log('Received Message: ' + message.toString() + '\nOn topic_telemetry: ' + topic_telemetry)
+  radar_parse(message.toString())
+})
+
+//=======================================================================================================
+client_telemetry.on('close', () => {
+  console.log(clientId_telemetry + ' disconnected')
+})
+*/
+client_js.on('error', (err) => {
+  console.log('Connection error: ', err)
+  client_js.end()
+})
+
+client_js.on('reconnect', () => {
+  console.log('Reconnecting...')
+})
+/*
+client_js.on('connect', () => {
+  console.log('Client connected:' + clientId_js_command)
+  client_js.subscribe('rover_command', { qos: 0 })
+})
+*/
+//===========================================================================================================================
+client_sys_msg.on('error', (err) => {
+  console.log('Connection error: ', err)
+  client_sys_msg.end()
+})
+
+client_sys_msg.on('reconnect', () => {
+  console.log('Reconnecting...')
+})
+
+client_sys_msg.on('connect', () => {
+  console.log('Client connected:' + clientId_sys_msg)
+  client_sys_msg.subscribe('rover_sys_message', { qos: 0 })
+})
+
+client_sys_msg.on('message', (topic_sys_message, message, packet) => {
+    console.log('Received Message: ' + message + '\nOn topic_sys_msg: ' + topic_sys_message)
+    sys_msg_parse(message)
+})
+
+client_sys_msg.on('close', () => {
+  console.log(clientId_sys_msg + ' disconnected')
+})
+
+//===========================================================================================================================
+client_battery.on('error', (err) => {
+  console.log('Connection error: ', err)
+  client_battery.end()
+})
+
+client_battery.on('reconnect', () => {
+  console.log('Reconnecting...')
+})
+
+client_battery.on('connect', () => {
+  console.log('Client connected:' + clientId_energy_power)
+  client_battery.subscribe('rover_telemetry_energy_power', { qos: 0 })
+})
+//=======================================================================================================rover_telemetry/
+client_battery.on('message', (topic_battery, message, packet) => {
+  console.log('Received Message: ' + message.toString() + '\nOn topic_telemetry: ' + topic_battery)
+  energy_power_parse(message.toString())
+})
+
+//=======================================================================================================
+client_battery.on('close', () => {
+  console.log(clientId_energy_power + ' disconnected')
+})
+//===========================================================================================================================
+//===========================================================================================================================
+client_radar.on('error', (err) => {
+  console.log('Connection error: ', err)
+  client_radar.end()
+})
+
+client_radar.on('reconnect', () => {
+  console.log('Reconnecting...')
+})
+
+client_radar.on('connect', () => {
+  console.log('Client connected:' + clientId_radar)
+  client_radar.subscribe('rover_telemetry_radar', { qos: 0 })
+})
+//=======================================================================================================rover_telemetry/
+client_radar.on('message', (topic_radar, message, packet) => {
+  console.log('Received Message: ' + message.toString() + '\nOn topic_telemetry: ' + topic_radar)
+  radar_parse(message.toString())
+})
+
+//=======================================================================================================
+client_radar.on('close', () => {
+  console.log(clientId_radar + ' disconnected')
+})
+
+//===========================================================================================================================
+//===========================================================================================================================
+client_wifi.on('error', (err) => {
+  console.log('Connection error: ', err)
+  client_wifi.end()
+})
+
+client_wifi.on('reconnect', () => {
+  console.log('Reconnecting...')
+})
+
+client_wifi.on('connect', () => {
+  console.log('Client connected:' + clientId_wifi_status)
+  client_wifi.subscribe('rover_telemetry_wifi_status', { qos: 0 })
+})
+//=======================================================================================================rover_telemetry/
+client_wifi.on('message', (topic_wifi, message, packet) => {
+  console.log('Received Message: ' + message.toString() + '\nOn topic_telemetry: ' + topic_wifi)
+  wifi_status_parse(message.toString())
+})
+
+//=======================================================================================================
+client_wifi.on('close', () => {
+  console.log(clientId_wifi_status + ' disconnected')
+})
+
+//===========================================================================================================================
+//===========================================================================================================================
+client_motors.on('error', (err) => {
+  console.log('Connection error: ', err)
+  client_motors.end()
+})
+
+client_motors.on('reconnect', () => {
+  console.log('Reconnecting...')
+})
+
+client_motors.on('connect', () => {
+  console.log('Client connected:' + clientId_motors)
+  client_motors.subscribe('rover_telemetry_motors_status', { qos: 0 })
+})
+//=======================================================================================================rover_telemetry/
+client_motors.on('message', (topic_motors, message, packet) => {
+  console.log('Received Message: ' + message.toString() + '\nOn topic_telemetry: ' + topic_motors)
+  motors_parse(message.toString())
+})
+
+//=======================================================================================================
+client_motors.on('close', () => {
+  console.log(clientId_motors + ' disconnected')
+})
+
+
+//<img; name="main"; id="main"; border="0"; width="640"; height="480"; src='http://' + address_video + '/rpicam/cam_pic_new.php'>
+//http://127.0.0.1:30011/rpicam/cam_pic.php?time=1642248041640&pDelay=40000 type='audio/webm; codecs="vorbis"' controls preload="none"
+document.body.style.backgroundImage = "url('http://" + address_video + "/?action=stream')";//"/rpicam/cam_pic_new.php')"; //address_video <video id="remoteVideo" autoplay="" playsinline="" muted="" width="100%" height="100%"></video>
+//<audio src="tcp://192.168.178.116:5002/output.mp2" ></audio>
+// vars 
+
+var solar_first_time = 0;
+var solar_panel_status = 0;
+var solar_panel_radar_warning = 0;
+
+// setup and start
+var battery_stat_label = document.getElementById("status battery");
+var net = document.getElementById("status");
+var demoP = document.getElementById("demo");
+var ws_ready = true;
+var fws_enable = false;
+var heart_beat;
+var ws;
+var ws_2
+//document.onkeypress = keypressed;
+// set KEYBOARD 330 330 250 150 w // set KEYBOARD steer_str cam_x cam_y acc_z rover_cmd_str
+/*
+function joypad(steer_joy, cam_x_joy, cam_y_joy, acc_z_joy, direction)
+{
+	if (joypad == true)
+	{
+		client_command.publish('rover_command', JSON.stringify({steer: steer_joy , cam_x: cam_x_joy , cam_y: cam_y_joy , acc_z: acc_z_joy , action: "move" , dir: direction}), { qos: 0, retain: false })
+	}else {
+		client_command.publish('rover_command', JSON.stringify({steer: 0, cam_x: 0, cam_y: 0, acc_z: 0, action: "move", dir: direction}), { qos: 0, retain: false })
+	}
+}
+*/
+
+/*
+function updateGamepad() {
+  requestAnimationFrame(updateGamepad);
+
+  // We'll only get the first gamepad in our list.
+  const gamepad = navigator.getGamepads()[0];
+
+  // If our gamepad isn't connected, stop here.
+  if (!gamepad) return;
+
+  // Update the background color of our page using axes from our gamepad.
+  // You might need to update these index values to work with your gamepad.
+
+  // Have the value go from 0 to 1 instead of -1 to 1
+  const hue = gamepad.axes[2] / 2;
+  const saturation = (gamepad.axes[0] + 1) / 2;
+  const lightness = (gamepad.axes[1] + 1) / 2;
+
+  document.body.style.backgroundColor = `hsl(${hue * 360},${
+    saturation * 100
+  }%,${lightness * 100}%)`;
+}
+*/
+//console.log(navigator.getGamepads());
+const myGamepad = navigator.getGamepads()[0]; // use the first gamepad
+
+js_message_aux = ''
+
+connected_gamepad = false;
+
+setInterval(() => {
+	if(gamepadIndex !== undefined) {
+		const myGamepad = navigator.getGamepads()[0]; // use the first gamepad
+		//console.log(`Left stick at (${myGamepad.axes[0]}, ${myGamepad.axes[1]})` );
+		//console.log(`Z Axel (${myGamepad.axes[5]}})` );
+		
+		js_message = JSON.stringify({action: "JS", L_stick_x: myGamepad.axes[0], L_stick_y: myGamepad.axes[1], R_stick_x: myGamepad.axes[2], R_stick_y: myGamepad.axes[3], Acc_z: myGamepad.buttons[7].value - myGamepad.buttons[6].value})
+			
+		if(js_message != js_message_aux)
+		{
+			//console.log(`Left stick at (${myGamepad.axes[0]}, ${myGamepad.axes[1]})` );
+			//console.log(`Right stick at (${myGamepad.axes[2]}, ${myGamepad.axes[3]})` );
+			console.log(myGamepad);
+			client_command.publish('rover_command', JSON.stringify({action: "JS", L_stick_x: myGamepad.axes[0], L_stick_y: myGamepad.axes[1], R_stick_x: myGamepad.axes[2], R_stick_y: myGamepad.axes[3], Acc_z: myGamepad.buttons[7].value - myGamepad.buttons[6].value}), { qos: 0, retain: false })
+			js_message_aux = js_message
+		}
+	}
+	//client_command.publish('rover_command', JSON.stringify({action: "JS", R_stick_x: myGamepad.axes[0], R_stick_y: myGamepad.axes[1], L_stick_x: myGamepad.axes[2], L_stick_y: myGamepad.axes[3]}), { qos: 0, retain: false })
+}, 50) // print axes 10 times per second
+
+let gamepadIndex;
+window.addEventListener('gamepadconnected', (event) => {
+    gamepadIndex = event.gamepad.index;
+	connected_gamepad = true;
+
+});
+
+document.addEventListener("gamepadButtonDown", (event) => {
+  console.log(`Gamepad Button ${event.detail.buttonIndex} pressed`);
+});
+
+document.addEventListener("gamepadButtonUp", (event) => {
+  console.log(`Gamepad Button ${event.detail.buttonIndex} released`);
+});
+
+setInterval(() => {
+    if(gamepadIndex !== undefined) {
+        // a gamepad is connected and has an index
+        const myGamepad = navigator.getGamepads()[gamepadIndex];
+        //document.body.innerHTML = ""; // reset page
+		var button_pressed = -1;
+        myGamepad.buttons.map(e => e.value).forEach((isPressed, buttonIndex) => {
+            if(isPressed) {
+				if(buttonIndex == 3 && button_pressed != 3){
+                // button is pressed; indicate this on the page
+				solar();
+				button_pressed == 3;
+                console.log(`Button (${buttonIndex}) is pressed`);
+				}
+				if(buttonIndex == 2 && button_pressed != 2){
+                // button is pressed; indicate this on the page
+				fws();
+				button_pressed == 2;
+                console.log(`Button (${buttonIndex}) is pressed`);
+				}
+				if(buttonIndex == 14 && button_pressed != 14){
+                // button is pressed; indicate this on the page
+				move(12);
+				button_pressed == 14;
+                console.log(`Button (${buttonIndex}) is pressed`);
+				}
+				if(buttonIndex == 15 && button_pressed != 15){
+                // button is pressed; indicate this on the page
+				move(13);
+				button_pressed == 15;
+                console.log(`Button (${buttonIndex}) is pressed`);
+				}
+				if(buttonIndex == 8 && button_pressed != 8){
+                // button is pressed; indicate this on the page
+				radar_on_off();
+				button_pressed == 8;
+                console.log(`Button (${buttonIndex}) is pressed`);
+				}
+				if(buttonIndex == 0 && button_pressed != 0){
+                // button is pressed; indicate this on the page
+				cam_steer(5);
+				button_pressed == 0;
+                console.log(`Button (${buttonIndex}) is pressed`);
+				}
+				//if()
+            }else button_pressed = -1;
+        })
+    }
+}, 100) // print buttons that are pressed 10 times per second
+
+
+function move(direction)
+{
+	if (ws_ready == true)
+	{
+		client_command.publish('rover_command', JSON.stringify({action: "move", dir: direction}), { qos: 0, retain: false })
+	}
+}
+
+function cam(direction)
+{
+	if (ws_ready == true)
+	{
+		client_command.publish('rover_command', JSON.stringify({action: "cam", dir: direction}), { qos: 0, retain: false })
+	}
+}
+
+function charge_battery_mode() 
+{
+	if (ws_ready == true)
+		{
+			client_command.publish('rover_command', JSON.stringify({action: "charge_battery_mode"}), { qos: 0, retain: false })
+		}
+}
+
+function fws()
+{
+	if (ws_ready == true)
+	{
+		if(fws_enable == false)
+		{
+			alert("⚠ FOUR WHEEL STEERING ENABLE ⚠");
+			client_command.publish('rover_command', JSON.stringify({action: "fws"}), { qos: 0, retain: false })
+			fws_enable = true
+		}else if(fws_enable == true){
+			alert("⚠ FOUR WHEEL STEERING DISABLE ⚠");
+			client_command.publish('rover_command', JSON.stringify({action: "fws"}), { qos: 0, retain: false })
+			fws_enable = false
+		}
+	}
+}
+
+function cam_steer()
+{
+	client_command.publish('rover_command', JSON.stringify({action: "cam_steer"}), { qos: 0, retain: false })
+}
+
+function reset_telemetry()
+{
+	client_command.publish('rover_command', JSON.stringify({action: "reboot_system"}), { qos: 0, retain: false })
+}
+
+var flag_forward = 0;
+var flag_backward = 0;
+var continuous_run = 0;
+
+$(document).on("keydown keyup keypressed", function(e) {
+	
+	if (e.type === 'keydown') {
+		Key_COMMAND (e.keyCode);
+	}
+	
+	if (e.keyCode == 87 && e.type == 'keydown') {
+		if(flag_forward == 0)
+		{
+			move(9);
+			flag_forward = 1;
+		}
+		
+	}
+
+	if (e.keyCode == 87 && e.type == 'keyup') {
+		move(2);
+		flag_forward = 0;
+	}
+	/*
+	if (e.keyCode == 83 && e.type == 'keydown' {
+			continuous_run = 0;
+			move(2);
+		}
+	*/
+	if (e.keyCode == 83 && e.type == 'keydown') {
+		if(flag_backward == 0)
+		{
+			move(14);
+			flag_backward = 1;
+		}
+		
+	}
+	if (e.keyCode == 83 && e.type == 'keyup') {
+		move(8);
+		flag_backward = 0;
+	}
+	
+	
+});
+
+//function keypressed (event) 
+function Key_COMMAND (Pressed_Key)
+{
+	//var keyCd = ('charCode' in event) ? event.charCode : event.keyCode;
+	var keyCd = Pressed_Key;
+
+	if (keyCd == 74)            // j
+	   cam(4)
+ 
+	if (keyCd == 76)            // l
+	   cam(6)
+ 
+	if (keyCd == 73)            // l
+	   cam(8)
+ 
+	if (keyCd == 75)            // l
+	   cam(2)
+ 
+	if (keyCd == 85)            // u
+	   cam(7)
+ 
+	if (keyCd == 79)
+	   cam(9) 					// o
+ 
+	if (keyCd == 50)            // /
+	   cam(5)
+ 
+	if (keyCd == 81)  // q  || keyCd == 81
+	   move(7)
+	/*
+	if (keyCd == 87)  // w  || keyCd == 87
+	   move(8)
+	
+	if (keyCd == 83)  // z
+	   move(2)
+	*/
+	if (keyCd == 69 )  // e || keyCd == 69
+	   //continuous_run = 1;
+	   move(9)
+	
+	if (keyCd == 65)   // a keyCd == 97 || 
+	   move(4)
+ 
+	if (keyCd == 68)  // s  || keyCd == 83
+	   move(6)
+ 
+	if (keyCd == 80)            // l
+	   solar() // p
+
+	if (keyCd == 49)            // l
+	   cam_steer() // 1
+
+	if (keyCd == 67)            // l
+	   move(12) // C
+
+	if (keyCd == 86)            // l
+	   move(13) //V
+	
+	if (keyCd == 88)            // l
+	   move(17) //z
+
+	if (keyCd == 90)            // l
+	   move(18) //x
+	
+	if (keyCd == 48)            // l
+	   move(19) //x
+
+}
+
+
+function solar()
+{
+	if (ws_ready == true)
+	{
+			client_command.publish('rover_command', JSON.stringify({action: "solar"}), { qos: 0, retain: false })
+
+	}
+}
+						
+function radar_on_off()
+{
+	if (ws_ready == true)
+	{
+		client_command.publish('rover_command', JSON.stringify({action: "radar_onoff"}), { qos: 0, retain: false });
+	}
+}
+
+var full = false;
+var elem = document.documentElement;
+
+function fullscreen()
+{
+	if (full == false)
+	{
+		if (elem.requestFullscreen) {elem.requestFullscreen();} 
+		else if (elem.mozRequestFullScreen) {elem.mozRequestFullScreen();}
+		else if (elem.webkitRequestFullscreen) {elem.webkitRequestFullscreen();}
+		else if (elem.msRequestFullscreen) {elem.msRequestFullscreen();}
+		full = true;
+	}
+	else
+	{
+		if (document.exitFullscreen) {document.exitFullscreen();}
+		else if (document.mozCancelFullScreen) {document.mozCancelFullScreen();}
+		else if (document.webkitExitFullscreen) {document.webkitExitFullscreen();}
+		else if (document.msExitFullscreen) {document.msExitFullscreen();}
+		full = false;
+	}
+}
+
+
+</script>
+</body>
+</html>

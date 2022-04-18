@@ -1,0 +1,9 @@
+[Unit]
+Description=uStreamer service
+After=network.target
+[Service]
+Environment="SCRIPT_ARGS=%I"
+User=root
+ExecStart=/usr/local/bin/ustreamer --host :: -m mjpeg  --device=/dev/video0 --buffers=3 --drop-same-frames=30 --desired-fps=10 --quality 70  --tcp-nodelay  -r 800x480 --port=8082
+[Install]
+WantedBy=multi-user.target
