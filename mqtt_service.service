@@ -1,0 +1,11 @@
+[Unit]
+Description=mqtt rover service
+After=multi-user.target
+
+[Service]
+User=root
+WorkingDirectory=/home/dietpi
+ExecStart=/usr/bin/python3 /home/dietpi/mqtt_service.py &
+
+[Install]
+WantedBy=multi-user.target

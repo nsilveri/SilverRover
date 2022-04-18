@@ -1,0 +1,15 @@
+[Unit]
+Description=auto start stream
+After=multi-user.target
+
+[Service]
+Type=simple
+ExecStartPre=sudo /usr/bin/amixer -c 1 -q set 'Mic',0 100%
+ExecStart=sudo /usr/bin/ffmpeg -ar 44100 -ac 1 -f alsa -i plughw:1,0 -f mp2 -listen 1 tcp://0.0.0.0:5002
+#ffmpeg -f  s16le  -ar 48000 -ac 2 -i 'udp://0.0.0.0:5002' output.wav
+User=root
+#WorkingDirectory=/home/dietpi
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
