@@ -1,6 +1,6 @@
 # SilverRover
 
-![alt text](https://github.com/nsilveri/SilverRover/blob/main/photo_2021-06-26_22-21-18.jpg)
+![alt text](https://github.com/nsilveri/SilverRover/blob/main/images/photo_2021-06-26_22-21-18.jpg)
 ![alt text](https://github.com/nsilveri/SilverRover/blob/main/Web_UI_control.png)
 Web UI is based on work of [@MrDyne](https://github.com/MrDyne/PiRover/blob/master/www/index.htm), the difference with him work is that I have added some features and changed some functionality: switch to MQTT for commands and receive telemetry, joystick support for control rover and other buttons for specific actions.
 
