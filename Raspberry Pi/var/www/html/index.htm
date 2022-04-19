@@ -13,12 +13,17 @@
 body {background-color: black; background-size: 100vw 100vh; background-repeat: no-repeat;}
 .label_power_main_title {opacity: 0.5; color: white; background-color: black; width: 9cm; height: 0.7cm; border: 0.1cm solid white; font-size: 0.3cm;}
 .label_power_title {opacity: 0.5; color: white; background-color: black; width: 4.65cm; height: 0.7cm; border: 0.1cm solid white; font-size: 0.3cm;}
+.label_video_title {opacity: 0.5; color: white; background-color: black; width: 1.5cm; height: 0.5cm; border: 0.1cm solid white; font-size: 0.3cm;}
 .label_battery {opacity: 0.5; color: white; background-color: black; width: 1.4cm; height: 0.7cm; border: 0.1cm solid white; font-size: 0.3cm;}
 .label_battery_watt {opacity: 0.5; color: white; background-color: black; width: 1.4cm; height: 0.7cm; border: 0.1cm solid white; font-size: 0.3cm;}
 .label_battery_title {opacity: 0.5; color: white; background-color: black; width: 2.85cm; height:0.7cm; border: 0.1cm solid white; font-size: 0.3cm;}
+.camera_resolution_label {opacity: 0.5; color: white; background-color: black; width: 1.4cm; height: 0.5cm; border: 0.1cm solid white; font-size: 0.15cm;}
+.camera_resolution_selector_label {opacity: 0.5; color: white; background-color: black; width: 0.25cm; height: 0.25cm; border: 0.01cm solid white; font-size: 0.15cm;}
+.camera_quality_label {opacity: 0.5; color: white; background-color: black; width: 1.4cm; height: 0.5cm; border: 0.1cm solid white; font-size: 0.15cm;}
 .label_sys_msg_title {opacity: 0.5; color: white; background-color: black; width: 5.65cm; height:0.7cm; border: 0.1cm solid white; font-size: 0.3cm;}
 .label_solar_title {opacity: 0.5; color: white; background-color: black; width: 4.65cm; height: 0.7cm; border: 0.1cm solid white; font-size: 0.3cm;}
 .label_power {opacity: 0.5; color: white; background-color: black; width: 1.5cm; height: 0.7cm; border: 0.1cm solid white; font-size: 0.3cm;}
+.label_video {opacity: 0.5; color: white; background-color: black; width: 1.5cm; height: 0.7cm; border: 0.1cm solid white; font-size: 0.25cm;}
 .label_STATUS {opacity: 0.5; color: white; background-color: black; width: 3cm; height: 3cm; border: 0.1cm solid white; font-size: 0.3cm;}
 .label_radar_title {opacity: 0.5; color: white; background-color: black; width: 3cm; height: 0.5cm; border: 0.1cm solid white; font-size: 0.3cm;}
 .label_radar {opacity: 0.5; color: white; background-color: black; width: 0.96cm; height: 1cm; border: 0.1cm solid white; font-size: 0.3cm;}
@@ -46,11 +51,22 @@ body {background-color: black; background-size: 100vw 100vh; background-repeat: 
 
 	</table>
 
+
 	<table style="position: fixed; bottom: 0px;">
 		<tr>
 			<td></td>
 			<td>steer<div class="button_trimmer"><p id="steer_value_label"></p></div></td>
 			<td></td>
+		</tr>
+		<tr>
+			<td><div class="button_trimmer" onclick="quality_lower()">🔻</div></td>
+			<td><div class="label_video" onclick="confirm_resolution()"><p id="camera_quality_label"></p></div></td>
+			<td><div class="button_trimmer" onclick="quality_upper()">🔺</div></td>
+		</tr>
+		<tr>
+			<td><div class="button_trimmer" onclick="resolution_lower()">🔻</div></td>
+			<td><div class="label_video" onclick="confirm_resolution()"><p id="camera_resolution_label"></p></div></td>
+			<td><div class="button_trimmer" onclick="resolution_upper()">🔺</div></td>
 		</tr>
 		<tr>
 			<td><div class="button_trimmer" onmousedown="move(18)" ontouchstart="move(18)">-</div></td>
@@ -102,7 +118,8 @@ body {background-color: black; background-size: 100vw 100vh; background-repeat: 
 				<td><div class="button_setting" onclick="radar_on_off()">📡</div></td>
 				<td><div class="button_setting" onclick="solar()">☀️</div></td>
 				<td><div class="button_setting" onclick="fws()">4WS 󠁢</div></td>
-				<td><div class="button_setting" onclick="move(19)">🔋</div></td>
+				<td><div class="button_setting" onclick="move(19)">🔋</div></td>		
+
 			</td>
 		</tr>
 		<tr>
@@ -112,7 +129,7 @@ body {background-color: black; background-size: 100vw 100vh; background-repeat: 
 						<div class="button_trimmer" onmousedown="move(15)" ontouchstart="move(15)">⇐⇐</div>
 					</tr>
 					<tr>
-						<div class="button_trimmer" onmousedown="move(12)" ontouchstart="move(12)">⬋</div>
+						<div class="button_trimmer" onmousedown="move(12)" ontouchstart="move(12)">T -</div>
 					</tr>
 				</table>
 			</td>
@@ -123,7 +140,7 @@ body {background-color: black; background-size: 100vw 100vh; background-repeat: 
 						<div class="button_trimmer" onmousedown="move(16)" ontouchstart="move(16)">⇒⇒</div>
 					</tr>
 					<tr>
-						<div class="button_trimmer" onmousedown="move(13)" ontouchstart="move(13)">⬊</div>
+						<div class="button_trimmer" onmousedown="move(13)" ontouchstart="move(13)">T +</div>
 					</tr>
 				</table>
 			</td>
@@ -208,8 +225,77 @@ function createRemap(x, inMin, inMax, outMin, outMax) {
     };
 }
 
+//<td><a href="" + windows.local.host + "/camera/snapshot" download="snapshot.jfif">click here</a></td>  //PER SCATTARE FOTO E SALVARLE
+//								   1		  2			  3			  4			  5
+var camera_resolution_array = ["400x320", "800x480", "1280x720", "1600x900", "1920x1080"];
+//							 1	  2		3	  4		5	  6		7	  8		9	  10    11    12    13    14    15    16    17    18	19	  20
+var camera_quality_array = ["5", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55", "60", "65", "70", "75", "80", "85", "90", "95", "100"];
+//						 1	  2		3	  4		5	  6		7	  8		9	  10    11    12
+var camera_fps_array = ["5", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55", "60"];
+
+
+
+var camera_resolution_value = 0;
+var camera_quality_value = 10;
+var camera_fps_value = 0;
+
+var camera_resolution_index = 0;
+var camera_quality_index = 0;
+var camera_fps_index = 0;
+
 var sys_alert_counter = 0;
 var sys_alert_blinking = 0;
+
+function resolution_upper()
+{
+	if (camera_resolution_index < camera_resolution_array.length-1)
+	{
+		camera_resolution_index++;
+		camera_resolution_value = camera_resolution_array[camera_resolution_index];
+		document.getElementById("camera_resolution_label").innerHTML = "R: " + camera_resolution_value;
+		//camera_resolution(camera_resolution_value, camera_quality_value);
+	}
+}
+
+function resolution_lower()
+{
+	if (camera_resolution_index > 0)
+	{
+		camera_resolution_index--;
+		camera_resolution_value = camera_resolution_array[camera_resolution_index];
+		document.getElementById("camera_resolution_label").innerHTML = "R:" + camera_resolution_value;
+		//camera_resolution(camera_resolution_value, camera_quality_value);
+	}
+}
+
+function quality_upper()
+{
+	if (camera_quality_index < camera_quality_array.length-1)
+	{
+		camera_quality_index++;
+		camera_quality_value = camera_quality_array[camera_quality_index];
+		document.getElementById("camera_quality_label").innerHTML = "Q: " + camera_quality_value;
+		//camera_resolution(camera_resolution_value, camera_quality_value);
+	}
+}
+
+function quality_lower()
+{
+	if (camera_quality_index > 0)
+	{
+		camera_quality_index--;
+		camera_quality_value = camera_quality_array[camera_quality_index];
+		document.getElementById("camera_quality_label").innerHTML = "Q: " + camera_quality_value;
+		//camera_resolution(camera_resolution_value, camera_quality_value);
+	}
+}
+
+
+function confirm_resolution()
+{
+	camera_resolution(camera_resolution_value, camera_quality_value);
+	setTimeout(function() { window.location.reload(); }, 2500);
+}
 
 function sys_msg_parse(evt) {
 		var dataStr = [];
@@ -309,6 +395,16 @@ function radar_parse(evt) {
 		document.getElementById("rover_watt_label").innerHTML = rover_watt.toFixed(2) + " W";
 	};
 
+	function telemetry_error_detector_parse(evt) {
+		var dataStr = [];
+		dataStr = JSON.stringify(evt);
+		console.log("TELEMETRY ERROR DETECTED: " + dataStr);
+		if(dataStr == 'TELEMETRY_ERROR')
+		{
+			reset_telemetry();
+		}
+	};
+
 	//function color(BatVar)
 	//{
 	//	if(BatVar.innerHTML > 0)
@@ -382,6 +478,7 @@ var client_casual_id = Math.random().toString(16).substr(2, 8);
 const clientId_command = 'rover_command_' + client_casual_id//'mqttjs_' + Math.random().toString(16).substr(2, 8)
 const clientId_radar = 'rover_telemetry_radar_' + client_casual_id
 const clientId_energy_power = 'rover_telemetry_power_' + client_casual_id
+const clientId_telemetry_error_detector = 'rover_telemetry_error' + client_casual_id
 const clientId_motors = 'rover_telemetry_motors_' + client_casual_id
 const clientId_wifi_status = 'rover_telemetry_wifi_status_' + client_casual_id
 const clientId_js_command = 'rover_js_command_' + client_casual_id
@@ -396,10 +493,16 @@ fritz_box_url = '"odafnsupwqp8hhg4'
 console.log(local_address)
 console.log(address_analysis[0])
 
-address_video = address + '/camera'
+address_video = address + '/camera/stream'
 console.log("http://" + address_video);
 address_audio = address + '/audio'
 address_mqtt = 'ws://' + address + '/mqtt'
+
+//document.body.style.backgroundImage = "url('http://" + address_video + "')";
+function update_background_video()
+{
+	document.body.style.backgroundImage = "url('http://" + address_video + "')";
+}
 
 document.body.style.backgroundImage = "url('http://" + address_video + "')";
 
@@ -455,7 +558,7 @@ const options_js_command = {
   connectTimeout: 30 * 1000,
   will: {
     topic: 'WillMsg',
-    payload: 'Connection command Closed abnormally..!',
+    payload: '[WEB UI] Connection command Closed abnormally..!',
     qos: 0,
     retain: false
   },
@@ -487,7 +590,7 @@ const options_sys_msg = {
   connectTimeout: 30 * 1000,
   will: {
     topic: 'WillMsg',
-    payload: 'Connection SYS_MSG Closed abnormally..!',
+    payload: '[WEB UI] Connection SYS_MSG closed abnormally..!',
     qos: 0,
     retain: false
   },
@@ -503,7 +606,7 @@ const options_radar = {
   connectTimeout: 30 * 1000,
   will: {
     topic: 'WillMsg',
-    payload: 'Connection RADAR closed abnormally..!',
+    payload: '[WEB UI] Connection RADAR closed abnormally..!',
     qos: 0,
     retain: false
   },
@@ -519,7 +622,23 @@ const options_power = {
   connectTimeout: 30 * 1000,
   will: {
     topic: 'WillMsg',
-    payload: 'Connection POWER closed abnormally..!',
+    payload: '[WEB UI] Connection POWER closed abnormally..!',
+    qos: 0,
+    retain: false
+  },
+}
+
+const options_telemetry_error_detector = {
+  keepalive: 60,
+  clientId: clientId_telemetry_error_detector,
+  protocolId: 'MQTT',
+  protocolVersion: 4,
+  clean: true,
+  reconnectPeriod: 1000,
+  connectTimeout: 30 * 1000,
+  will: {
+    topic: 'WillMsg',
+    payload: '[WEB UI] Connection TELEMETRY_ERROR_DETECTOR closed abnormally..!',
     qos: 0,
     retain: false
   },
@@ -535,7 +654,7 @@ const options_motors = {
   connectTimeout: 30 * 1000,
   will: {
     topic: 'WillMsg',
-    payload: 'Connection MOTORS closed abnormally..!',
+    payload: '[WEB UI] Connection MOTORS closed abnormally..!',
     qos: 0,
     retain: false
   },
@@ -551,7 +670,7 @@ const options_wifi = {
   connectTimeout: 30 * 1000,
   will: {
     topic: 'WillMsg',
-    payload: 'Connection CONNECTION closed abnormally..!',
+    payload: '[WEB UI] WIRELESS_CONNECTIONS closed abnormally..!',
     qos: 0,
     retain: false
   },
@@ -562,7 +681,7 @@ window.oncontextmenu = function(event) {event.preventDefault(); event.stopPropag
 
 console.log('connecting mqtt client')
 const client_command = mqtt.connect(address_mqtt, options_command)
-//const client_telemetry = mqtt.connect(address_mqtt, options_telemetry)
+const client_telemetry_error = mqtt.connect(address_mqtt, options_telemetry_error_detector)
 const client_battery = mqtt.connect(address_mqtt, options_power)
 const client_radar = mqtt.connect(address_mqtt, options_radar)
 //const client_battery = mqtt.connect(address_mqtt, options_motors)
@@ -684,7 +803,38 @@ client_battery.on('message', (topic_battery, message, packet) => {
 client_battery.on('close', () => {
   console.log(clientId_energy_power + ' disconnected')
 })
-//===========================================================================================================================
+
+
+
+//=======================================================================================================
+// CLIENT TELELEMETRY ERROR DETECTOR ====================================================================
+client_telemetry_error.on('error', (err) => {
+  console.log('Connection error: ', err)
+  client_telemetry_error.end()
+})
+
+client_telemetry_error.on('reconnect', () => {
+  console.log('Reconnecting...')
+})
+
+client_telemetry_error.on('connect', () => {
+  console.log('Client connected:' + clientId_telemetry_error_detector)
+  client_telemetry_error.subscribe('rover_telemetry_error', { qos: 0 })
+})
+//=======================================================================================================rover_telemetry/
+client_telemetry_error.on('message', (topic_telemetry_error, message, packet) => {
+  console.log('Received Message: ' + message.toString() + '\nOn topic_telemetry: ' + topic_telemetry_error)
+  energy_power_parse(message.toString())
+})
+
+//=======================================================================================================
+client_telemetry_error.on('close', () => {
+  console.log(clientId_telemetry_error_detector + ' disconnected')
+})
+
+
+
+
 //===========================================================================================================================
 client_radar.on('error', (err) => {
   console.log('Connection error: ', err)
@@ -925,6 +1075,14 @@ function cam(direction)
 	if (ws_ready == true)
 	{
 		client_command.publish('rover_command', JSON.stringify({action: "cam", dir: direction}), { qos: 0, retain: false })
+	}
+}
+
+function camera_resolution(resolution, quality)
+{
+	if (ws_ready == true)
+	{
+		client_command.publish('rover_command', JSON.stringify({action: "resolution", res: resolution, qty: quality}), { qos: 0, retain: false })
 	}
 }
 

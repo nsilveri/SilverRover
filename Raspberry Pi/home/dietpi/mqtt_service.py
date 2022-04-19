@@ -24,6 +24,7 @@ client_telemetry_radar_topic = "rover_telemetry_radar"
 client_telemetry_energy_power_topic = "rover_telemetry_energy_power"
 client_telemetry_wifi_status_topic = "rover_telemetry_wifi_status"
 client_telemetry_motors_status_topic = "rover_telemetry_motors_status"
+client_telemetry_error_topic = "rover_telemetry_error"
 client_sys_message_topic = "rover_sys_message"
 
 now = datetime.now()
@@ -77,8 +78,19 @@ def cellular_connection():
         isp = carrier_dict["FullName"]
         cell_signal = cellular_signal_dict["rsrp"]
 
-###########################################################
+#######  CAMERA RESOLUTION QUALITY SELECTOR  ##############
+def camera_first_run():
+    os.system('sudo systemctl restart ustreamer@"--quality 10 -r 1280x720".service')
 
+def camera_stream(resolution, quality): 
+    line = str('ARG1=-r ' + str(resolution) + ' ARG2=--quality ' + str(quality) + '')
+    print(line)
+    with open('/home/dietpi/.uStreamer.env', 'w') as f:
+        f.write(line)
+    f.close()
+    time.sleep(1)
+    os.system('sudo systemctl restart ustreamer')
+###########################################################
 ###### ROVER_GETWAY <---------> RASPBERRY MIDDLEWARE ######
 try:                                                      #
    # Change the baud rate here if diffrent than 19200     #
@@ -91,6 +103,7 @@ broker_address = "127.0.0.1"
 port=1883
 client_telemetry = mqtt.Client('rover_telemetry_client')
 client_telemetry.connect(broker_address, port)
+client_telemetry.will_set(client_telemetry_error_topic,"TELEMETRY_ERROR", 0, False)
  #OUTPUT
 ###########################################################
 client_command_topic = "rover_command"
@@ -195,6 +208,10 @@ def on_message_command(data):
         Acc_z = data['Acc_z']
         rover_command_string = str('JS ' + str(_map(L_stick_x, -1, 1, 220, 440)) + ' ' + str(_map(R_stick_x, 1, -1, 85, 520)) + ' ' + str( _map(R_stick_y, 1, -1, 235, 465)) + ' ' + str(_map(Acc_z, -1, 1, 0, 100)) + '\n')#  _map(Acc_z, -1, 1, 220, 440)
         rover.write(bytes(rover_command_string.encode('ascii')))
+    if data['action'] == "resolution":
+        resolution = data['res']
+        quality = data['qty']
+        camera_stream(resolution, quality)
     if data['action'] == "move":
         message_sent = False
         if data['dir'] == 7:
@@ -346,7 +363,7 @@ def on_message_command(data):
     #cam_y = 0
     #acc_z = 0
     #rover_message = ('' + str(steer_x) + 'A' + str(cam_x) + 'B' + str(cam_y) + 'C' + str(acc_z) + 'D' + str(rover_command_string) + 'E')) + '\n') # + '\n'
-    print(rover_command_string)
+    #print(rover_command_string)
     #if(message_sent == False): #rover_message != rover_message_aux and 
     #    rover_message_aux = rover_message
     #    rover.write(('' + str(steer_x) + 'A' + str(cam_x) + 'B' + str(cam_y) + 'C' + str(acc_z) + 'D' + str(rover_command_string) + 'E')) + '\n').encode('ascii'))

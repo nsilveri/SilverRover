@@ -72,8 +72,11 @@ all this driven by Raspberry Pico which receives commands from a Raspbery Pi via
     14) Switch from two Solar Power Manager (A) to one Solar Power Manager (B) (A: only 5V 500mA, B: 5V 3000mA for each port)
     15) Switch from RPi Cam Web Interface to uStreamer [https://github.com/pikvm/ustreamer]
 
-    I will update the photos as soon as possible
-    
+  19/04/2022
+   
+    1) Added the ability to select the resolution and quality of the camera stream during its use, if you have a bad wifi reception you can select a lower resolution and quality to reduce the bandwidth usage, or if you have a good wifi reception, you can select a higher resolution and quality
+
+
   TO DO:
 
       OLD:
@@ -98,6 +101,8 @@ all this driven by Raspberry Pico which receives commands from a Raspbery Pi via
         |                                                                               |
         |     - Add audio board USB with microphone |OK|                                |
         |                                                                               |
+        |     - Add selectable resolution and quality of the camera stream |OK|         |
+        |                                                                               |
         +===============================================================================+
         
       CURRENT:
@@ -106,7 +111,11 @@ all this driven by Raspberry Pico which receives commands from a Raspbery Pi via
         +======================+
         
       NEW:
-        +============================================================+
-        |    Make the battery chargable without stopping the current |
-        +============================================================+
+        +==============================================================+
+        |  - Make the battery chargable without stopping the current   |
+        |                                                              |
+        |  - Add the automatic function to change resolution and       |
+        |    quality of the camera stream according to signal quality  |
+        |                                                              |
+        +==============================================================+
     
