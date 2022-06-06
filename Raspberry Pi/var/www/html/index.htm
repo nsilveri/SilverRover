@@ -225,16 +225,16 @@ function createRemap(x, inMin, inMax, outMin, outMax) {
     };
 }
 
-//<td><a href="" + windows.local.host + "/camera/snapshot" download="snapshot.jfif">click here</a></td>  //PER SCATTARE FOTO E SALVARLE
-//								   1		  2			  3			  4			  5
-var camera_resolution_array = ["400x320", "800x480", "1280x720", "1600x900", "1920x1080"];
+// CAMERA RESOLUTION, QUALITY, FPS ARRAYS
+//								   1		  2			  3			  4	          5			   6			7
+var camera_resolution_array = ["400x320", "800x480", "1280x720", "1600x900", "1920x1080", "2560x1440", "2592x1944"];
 //							 1	  2		3	  4		5	  6		7	  8		9	  10    11    12    13    14    15    16    17    18	19	  20
 var camera_quality_array = ["5", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55", "60", "65", "70", "75", "80", "85", "90", "95", "100"];
 //						 1	  2		3	  4		5	  6		7	  8		9	  10    11    12
 var camera_fps_array = ["5", "10", "15", "20", "25", "30", "35", "40", "45", "50", "55", "60"];
 
 
-
+// CURRENT CAMERA VALUES	=============
 var camera_resolution_value = 0;
 var camera_quality_value = 10;
 var camera_fps_value = 0;
@@ -242,11 +242,12 @@ var camera_fps_value = 0;
 var camera_resolution_index = 0;
 var camera_quality_index = 0;
 var camera_fps_index = 0;
+//=======================================
 
 var sys_alert_counter = 0;
 var sys_alert_blinking = 0;
 
-function resolution_upper()
+function resolution_upper()	// WHEN UP ARROW IS PRESSED THE RESOLUTION IS INCREASED
 {
 	if (camera_resolution_index < camera_resolution_array.length-1)
 	{
@@ -257,7 +258,7 @@ function resolution_upper()
 	}
 }
 
-function resolution_lower()
+function resolution_lower() //	WHEN DOWN ARROW IS PRESSED THE RESOLUTION IS DECREASED
 {
 	if (camera_resolution_index > 0)
 	{
@@ -268,7 +269,7 @@ function resolution_lower()
 	}
 }
 
-function quality_upper()
+function quality_upper() //	WHEN UP ARROW IS PRESSED THE QUALITY IS INCREASED
 {
 	if (camera_quality_index < camera_quality_array.length-1)
 	{
@@ -279,7 +280,7 @@ function quality_upper()
 	}
 }
 
-function quality_lower()
+function quality_lower() // WHEN DOWN ARROW IS PRESSED THE QUALITY IS DECREASED
 {
 	if (camera_quality_index > 0)
 	{
@@ -291,7 +292,7 @@ function quality_lower()
 }
 
 
-function confirm_resolution()
+function confirm_resolution()  // SEND NEW SELECTED CAMERA SETTING VIA MQTT AND REFRESH PAGE TO RECEIVE NEW CAMERA STREAM
 {
 	camera_resolution(camera_resolution_value, camera_quality_value);
 	setTimeout(function() { window.location.reload(); }, 2500);
@@ -300,49 +301,20 @@ function confirm_resolution()
 function sys_msg_parse(evt) {
 		var dataStr = [];
 		dataStr = evt;
-		//console.log(evt);
-		// Series idx 0=Temp idx 1=Hum 
-		//const obj = JSON.parse(dataStr);
-		//solar_first_time = false;
-		console.log(sys_msg = dataStr);//obj.rf;
+		console.log(sys_msg = dataStr);
 		document.getElementById("sys_msg_label").innerHTML = '<b style="color:yellow;">' + sys_msg;
-		/*
-		if(sys_alert_counter <= 5)
-		{
-			if(sys_alert_blinking == 0)
-			{
-				document.getElementById("sys_msg_label").innerHTML = '<b style="color:yellow;">' + sys_msg;
-				sys_alert_blinking = 1;
-			}else if(sys_alert_blinking == 1)
-			{
-				document.getElementById("sys_msg_label").innerHTML = '<b style="color:green;">' + sys_msg;
-				sys_alert_blinking = 0;
-			}
-			sys_alert_counter = sys_alert_counter + 1;
-		}else if(sys_alert_counter == 5)
-		{
-			sys_alert_counter = 0;
-			sys_msg = '';
-			document.getElementById("sys_msg_label").innerHTML = sys_msg;
-		}
-		*/
-		//document.getElementById("radar_45_left_label").innerHTML = radar_45_left;
-		//document.getElementById("radar_45_right_label").innerHTML = radar_45_right;
-		//document.getElementById("radar_center_left_label").innerHTML = radar_center_left;
-		//document.getElementById("radar_center_right_label").innerHTML = radar_center_right;
 	};
 
 function radar_parse(evt) {
 		var dataStr = [];
 		dataStr = JSON.stringify(evt).split(",");
-		// Series idx 0=Temp idx 1=Hum 
-		//const obj = JSON.parse(dataStr);
+
 		solar_first_time = false;
-		console.log(radar_front = Math.round(dataStr[0].slice(1, )));//obj.rf;
-		console.log(radar_45_left = Math.round(parseInt(dataStr[1])));//obj.r45l;
-		console.log(radar_45_right = Math.round(dataStr[2]));//obj.r45r;
-		console.log(radar_center_left = Math.round(dataStr[3]));//obj.rs;
-		console.log(radar_center_right = Math.round(dataStr[4].slice(0,3)));//obj.rd;
+		console.log(radar_front = Math.round(dataStr[0].slice(1, )));
+		console.log(radar_45_left = Math.round(parseInt(dataStr[1])));
+		console.log(radar_45_right = Math.round(dataStr[2]));
+		console.log(radar_center_left = Math.round(dataStr[3]));
+		console.log(radar_center_right = Math.round(dataStr[4].slice(0,3)));
 
 		document.getElementById("radar_front_label").innerHTML = radar_front;
 		document.getElementById("radar_45_left_label").innerHTML = radar_45_left;
@@ -357,9 +329,9 @@ function radar_parse(evt) {
 		var dataStr = [];
 		dataStr = JSON.stringify(evt).split(",");
 		solar_first_time = false;
-		console.log(battery_voltage = parseFloat(dataStr[9]));//.slice(1, )));//obj.v_1;
-		console.log(battery_current = Math.round((parseFloat(dataStr[10]))));//.slice(1, )));//obj.v_1;
-		console.log(battery_percentage = parseFloat(dataStr[5]));//obj.v_1;
+		console.log(battery_voltage = parseFloat(dataStr[9]));
+		console.log(battery_current = Math.round((parseFloat(dataStr[10]))));
+		console.log(battery_percentage = parseFloat(dataStr[5]));
 		console.log(solar_voltage = parseFloat(dataStr[1]));//obj.v_2;
 		console.log(solar_current = Math.round(parseFloat(dataStr[2])));//obj.a_2;
 		console.log(rover_voltage = parseFloat(dataStr[3]));//obj.v_3;

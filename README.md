@@ -14,6 +14,8 @@ WEB UI CONTROL:
 
   4G connection:
     ![alt text](https://github.com/nsilveri/SilverRover/blob/main/images/Screenshot(21).png)
+
+    
     Web UI is based on work of [@MrDyne](https://github.com/MrDyne/PiRover/blob/master/www/index.htm), the difference with him work is that I have added some features and changed some functionality: switch to MQTT for commands and receive telemetry, joystick support for control rover and other buttons for specific actions.
 
 https://github.com/nsilveri/SilverRover/blob/main/VID-20210402-WA0045.mp4
@@ -81,6 +83,12 @@ all this driven by Raspberry Pico which receives commands from a Raspbery Pi via
   19/04/2022
    
     1) Added the ability to select the resolution and quality of the camera stream during its use, if you have a bad wifi reception you can select a lower resolution and quality to reduce the bandwidth usage, or if you have a good wifi reception, you can select a higher resolution and quality
+
+  06/06/2022
+
+    1) Added a servomotor to rotate the WiFi antenna (planar antenna) to find the best gain(dB) / position, 3 buttons have been added through which it is possible to manually rotate the antenna or perform an automatic scan that will position the antenna in the direction with the greatest gain(dNAdded a servomotor to rotate the WiFi antenna (planar antenna) to find the best gain / position, 3 buttons have been added through which it is possible to manually rotate the antenna or perform an automatic scan that will position the antenna in the direction with the greatest (dB) (Photo and Video will be added)
+
+    
 
 
   TO DO:
